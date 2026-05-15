@@ -1,45 +1,173 @@
 # OpenStack VM Orchestrator
 
-**Production-grade REST API for OpenStack VM lifecycle management using FastAPI and OpenStack SDK.**
+**REST API for managing OpenStack VM lifecycle operations using FastAPI and OpenStack SDK.**
 
-A proof-of-concept demonstrating clean architecture, comprehensive testing, and platform engineering best practices for managing virtual machine operations on OpenStack cloud infrastructure.
+An interview assignment proof-of-concept demonstrating clean architecture, API design, Python development fundamentals, and platform engineering thinking.
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
+- [About This Project](#about-this-project)
+- [Current Implementation Status](#current-implementation-status)
+- [Implementation Phases](#implementation-phases)
 - [Quick Start](#quick-start)
-- [API Endpoints](#api-endpoints)
-- [Architecture](#architecture)
+- [Architecture & Design](#architecture--design)
 - [Design Decisions](#design-decisions)
 - [Setup & Configuration](#setup--configuration)
-- [Usage Examples](#usage-examples)
-- [Testing](#testing)
-- [DevOps & Deployment](#devops--deployment)
-- [Monitoring & Observability](#monitoring--observability)
-- [Project Roadmap](#project-roadmap)
-- [Contributing](#contributing)
+- [API Endpoints](#api-endpoints)
+- [Testing Strategy](#testing-strategy)
+- [Next Steps](#next-steps)
 
 ---
 
-## Overview
+## About This Project
 
-### What This Is
+### Objective
 
-A **REST API service** that abstracts OpenStack cloud infrastructure complexity, providing intuitive endpoints for VM lifecycle management. Built with production-grade patterns: clean architecture, dependency injection, comprehensive error handling, and extensive testing.
+Build a REST API service for OpenStack VM lifecycle management that demonstrates:
 
-### What This Demonstrates
+- **API Design**: RESTful endpoints with consistent error handling
+- **Clean Architecture**: Layered separation (routes → services → providers)
+- **Python Development**: Type hints, async/await, Pydantic validation
+- **Engineering Thinking**: Design decisions, tradeoffs, extensibility
+- **Testing Discipline**: Unit and integration tests with meaningful coverage
+- **SDLC Awareness**: Incremental development, documentation, roadmap
 
-| Skill | Evidence |
-|-------|----------|
-| **Software Architecture** | Provider abstraction, service layer, dependency injection pattern |
-| **Python Development** | FastAPI, Pydantic, async/await, type hints, SOLID principles |
-| **API Design** | RESTful conventions, OpenAPI documentation, error handling contracts |
-| **Testing Discipline** | Unit, integration, end-to-end tests; 80%+ code coverage |
-| **DevOps Mindset** | Docker, docker-compose, CI/CD pipeline (GitLab), monitoring ready |
-| **Cloud Infrastructure** | OpenStack (Nova, Cinder, Neutron), IaC concepts, infrastructure abstraction |
-| **Engineering Maturity** | SDLC awareness, design trade-offs, extensibility, operational thinking |
+### Interview Assignment Requirements
+
+✅ **Deliverables**:
+- Public GitHub repository
+- Working Python prototype
+- Comprehensive README (this file)
+- Design documentation (ARCHITECTURE.md - planned)
+- Architecture writeup
+- Design choices explanation
+- Working roadmap/backlog (ROADMAP.md - planned)
+- Best practices demonstration
+
+✅ **Scope**:
+- VM lifecycle management (create, list, get, start, stop, delete)
+- Clean code and best practices
+- Follow SDLC principles
+- Work with real OVH OpenStack (optional, with mock fallback)
+
+---
+
+## Current Implementation Status
+
+### Phase 1: Foundation & Documentation
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Project structure | 🟢 Planned | Ready to implement |
+| README.md | 🟢 In Progress | This file |
+| ARCHITECTURE.md | 🟡 Planned | Next |
+| ROADMAP.md | 🟡 Planned | After architecture |
+| pyproject.toml | 🟡 Pending | Dependencies definition |
+
+### Phase 2: Core Implementation
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Domain models | ⚪ Not Started | VM, Volume, Snapshot |
+| Pydantic schemas | ⚪ Not Started | Request/response validation |
+| Provider abstraction | ⚪ Not Started | Base interface |
+| Mock provider | ⚪ Not Started | In-memory implementation |
+| OpenStack provider | ⚪ Not Started | Real OVH integration |
+| FastAPI app setup | ⚪ Not Started | Main entry point |
+| VM routes | ⚪ Not Started | CRUD + lifecycle operations |
+| Volume routes | ⚪ Not Started | Storage management |
+| Error handling | ⚪ Not Started | Custom exceptions + HTTP mapping |
+| Structured logging | ⚪ Not Started | Logging infrastructure |
+
+### Phase 3: Testing & Validation
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Unit tests | ⚪ Not Started | Service logic tests |
+| Integration tests | ⚪ Not Started | API endpoint tests |
+| Test fixtures | ⚪ Not Started | Mock data, helpers |
+| Coverage reporting | ⚪ Not Started | Target 80%+ |
+| pytest configuration | ⚪ Not Started | Test runner setup |
+
+### Phase 4: DevOps & Documentation
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Dockerfile | ⚪ Not Started | Container image |
+| docker-compose.yml | ⚪ Not Started | Local dev environment |
+| .gitlab-ci.yml | ⚪ Not Started | CI/CD pipeline |
+| Environment config | ⚪ Not Started | .env template |
+| Setup documentation | ⚪ Not Started | Local + Docker + OVH |
+
+**Legend**: 🟢 Complete | 🟡 In Progress | ⚪ Not Started | 🔴 Blocked
+
+---
+
+## Implementation Phases
+
+### Phase 1: Foundation (Current)
+**Goal**: Establish project structure, document architecture, define API contracts
+
+- [x] Repository creation
+- [x] README documentation (comprehensive, progressive)
+- [ ] Project structure scaffold
+- [ ] ARCHITECTURE.md (design patterns and decisions)
+- [ ] ROADMAP.md (phased approach and backlog)
+- [ ] pyproject.toml (dependency management)
+
+**Deliverables**: Architecture plan, documentation, ready-to-code structure
+
+### Phase 2: Core API Implementation
+**Goal**: Build working endpoints with clean architecture
+
+- [ ] Domain models (VM, Volume, Snapshot classes)
+- [ ] Pydantic schemas (request/response validation)
+- [ ] Provider abstraction (base interface)
+- [ ] Mock provider (in-memory, no dependencies)
+- [ ] OpenStack provider (real OVH integration)
+- [ ] FastAPI application setup
+- [ ] VM CRUD endpoints (create, list, get, delete)
+- [ ] VM lifecycle endpoints (start, stop, reboot)
+- [ ] Volume management endpoints
+- [ ] Error handling and exceptions
+- [ ] Structured logging
+
+**Deliverables**: Working API, fully functional with mock data
+
+### Phase 3: Testing & Quality
+**Goal**: Ensure code quality and reliability
+
+- [ ] Unit tests (services, schemas, validators)
+- [ ] Integration tests (API endpoints)
+- [ ] Fixtures and mock data
+- [ ] Coverage reporting (80%+)
+- [ ] pytest configuration
+
+**Deliverables**: Test suite, coverage reports
+
+### Phase 4: DevOps & Deployment
+**Goal**: Containerize and automate
+
+- [ ] Dockerfile for API service
+- [ ] docker-compose.yml for local development
+- [ ] .gitlab-ci.yml (test, build, deploy stages)
+- [ ] Environment configuration (.env template)
+- [ ] Deployment documentation
+
+**Deliverables**: Containerized service, CI/CD ready
+
+### Phase 5: Polish & Documentation
+**Goal**: Complete documentation and finalize
+
+- [ ] ARCHITECTURE.md (patterns, decisions, diagrams)
+- [ ] ROADMAP.md (vision and backlog)
+- [ ] API usage examples
+- [ ] Troubleshooting guide
+- [ ] Contributing guidelines
+
+**Deliverables**: Complete documentation suite
 
 ---
 
@@ -47,377 +175,45 @@ A **REST API service** that abstracts OpenStack cloud infrastructure complexity,
 
 ### Prerequisites
 
-- **Python 3.11+**
-- **Docker & Docker Compose** (for containerized environment)
-- **OpenStack credentials** (OVH account + openrc.sh) *optional for mock provider*
-- **Poetry** or **uv** (Python package manager)
+- Python 3.11+
+- Poetry or pip
+- Optional: Docker & Docker Compose
+- Optional: OVH OpenStack account
 
-### Option 1: Using Docker Compose (Recommended)
+### Current Status
+
+⚠️ **Under Construction**: The API is being built incrementally. Check the [Implementation Phases](#implementation-phases) section for progress.
+
+### Setup (Once Complete)
+
+Once the API is implemented, setup will be:
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/jafarijason/openstack-ovh-vm-orchestrator.git
 cd openstack-ovh-vm-orchestrator
 
-# Start the API service (uses mock provider by default)
-docker-compose up -d
-
-# API is now available at http://localhost:8000
-# Swagger UI: http://localhost:8000/docs
-# ReDoc: http://localhost:8000/redoc
-```
-
-### Option 2: Local Development Setup
-
-```bash
-# Clone and navigate
-git clone https://github.com/jafarijason/openstack-ovh-vm-orchestrator.git
-cd openstack-ovh-vm-orchestrator
-
-# Create virtual environment
+# Option 1: Local development
 python3.11 -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
+source .venv/bin/activate
 pip install poetry
 poetry install
+uvicorn app.main:app --reload
 
-# Run the development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
+# Option 2: Docker
+docker-compose up -d
 
-### Option 3: With Real OVH OpenStack
-
-```bash
-# Download openrc.sh from OVH dashboard (Users & Roles section)
-# Place in project root and source it
-source openrc.sh
-
-# Set provider mode
-export PROVIDER=openstack
-
-# Run with real OVH credentials
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-### Verify Installation
-
-```bash
-# Health check
-curl http://localhost:8000/health
-
-# Expected response
-{
-  "status": "healthy",
-  "version": "0.1.0",
-  "provider": "mock"
-}
+# Access API
+# - Local: http://localhost:8000
+# - Swagger UI: http://localhost:8000/docs
+# - ReDoc: http://localhost:8000/redoc
 ```
 
 ---
 
-## API Endpoints
+## Architecture & Design
 
-### VM Lifecycle Management
-
-#### Create VM
-```bash
-POST /api/v1/vms
-Content-Type: application/json
-
-{
-  "name": "web-server-01",
-  "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
-  "flavor_id": "2",
-  "network_ids": ["net-internal"],
-  "metadata": {
-    "environment": "production",
-    "team": "platform"
-  }
-}
-
-# Response: 201 Created
-{
-  "id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "name": "web-server-01",
-  "status": "BUILDING",
-  "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
-  "flavor_id": "2",
-  "created_at": "2024-05-14T15:30:00Z",
-  "metadata": {
-    "environment": "production",
-    "team": "platform"
-  }
-}
-```
-
-#### List VMs
-```bash
-GET /api/v1/vms?limit=10&offset=0
-
-# Response: 200 OK
-{
-  "items": [
-    {
-      "id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-      "name": "web-server-01",
-      "status": "ACTIVE",
-      "flavor": "2",
-      "image": "Ubuntu 22.04 LTS",
-      "created_at": "2024-05-14T15:30:00Z"
-    }
-  ],
-  "total": 1,
-  "limit": 10,
-  "offset": 0
-}
-```
-
-#### Get VM Details
-```bash
-GET /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e
-
-# Response: 200 OK
-{
-  "id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "name": "web-server-01",
-  "status": "ACTIVE",
-  "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
-  "flavor_id": "2",
-  "networks": [
-    {
-      "id": "net-internal",
-      "name": "internal-network",
-      "ip_address": "192.168.1.10"
-    }
-  ],
-  "volumes": [],
-  "created_at": "2024-05-14T15:30:00Z",
-  "updated_at": "2024-05-14T15:35:00Z",
-  "metadata": {}
-}
-```
-
-#### Start VM
-```bash
-POST /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e/start
-
-# Response: 202 Accepted
-{
-  "id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "status": "ACTIVE",
-  "message": "VM start operation initiated"
-}
-```
-
-#### Stop VM
-```bash
-POST /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e/stop
-
-# Response: 202 Accepted
-{
-  "id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "status": "SHUTOFF",
-  "message": "VM stop operation initiated"
-}
-```
-
-#### Reboot VM
-```bash
-POST /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e/reboot
-
-# Response: 202 Accepted
-{
-  "id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "status": "REBOOT",
-  "message": "VM reboot operation initiated"
-}
-```
-
-#### Delete VM
-```bash
-DELETE /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e
-
-# Response: 204 No Content
-```
-
-### Volume Management
-
-#### Create Volume
-```bash
-POST /api/v1/volumes
-Content-Type: application/json
-
-{
-  "name": "data-volume-01",
-  "size_gb": 100,
-  "description": "Data storage volume",
-  "volume_type": "default"
-}
-
-# Response: 201 Created
-{
-  "id": "vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e",
-  "name": "data-volume-01",
-  "status": "AVAILABLE",
-  "size_gb": 100,
-  "attachments": [],
-  "created_at": "2024-05-14T15:30:00Z"
-}
-```
-
-#### List Volumes
-```bash
-GET /api/v1/volumes
-
-# Response: 200 OK
-{
-  "items": [
-    {
-      "id": "vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e",
-      "name": "data-volume-01",
-      "status": "IN-USE",
-      "size_gb": 100,
-      "attached_to": ["5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e"],
-      "created_at": "2024-05-14T15:30:00Z"
-    }
-  ],
-  "total": 1
-}
-```
-
-#### Create Snapshot
-```bash
-POST /api/v1/volumes/vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e/snapshot
-Content-Type: application/json
-
-{
-  "name": "data-volume-01-backup-2024-05-14",
-  "description": "Daily backup"
-}
-
-# Response: 201 Created
-{
-  "id": "snap-3b2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e",
-  "name": "data-volume-01-backup-2024-05-14",
-  "status": "AVAILABLE",
-  "volume_id": "vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e",
-  "size_gb": 100,
-  "created_at": "2024-05-14T15:30:00Z"
-}
-```
-
-#### Attach Volume to VM
-```bash
-POST /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e/volumes/vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e/attach
-Content-Type: application/json
-
-{
-  "device": "/dev/vdb"  # Optional, auto-assigned if omitted
-}
-
-# Response: 202 Accepted
-{
-  "vm_id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "volume_id": "vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e",
-  "status": "ATTACHING",
-  "device": "/dev/vdb"
-}
-```
-
-#### Detach Volume from VM
-```bash
-POST /api/v1/vms/5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e/volumes/vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e/detach
-
-# Response: 202 Accepted
-{
-  "vm_id": "5f4e8d21-3c9a-4b7f-8e2d-1a5f9d8c7b2e",
-  "volume_id": "vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e",
-  "status": "DETACHING"
-}
-```
-
-#### Delete Volume
-```bash
-DELETE /api/v1/volumes/vol-8f2e1d5c-9a3b-4c7f-8e2d-1a5f9d8c7b2e
-
-# Response: 204 No Content
-```
-
-### Health & Status
-
-#### Health Check
-```bash
-GET /health
-
-# Response: 200 OK
-{
-  "status": "healthy",
-  "version": "0.1.0",
-  "provider": "mock",
-  "timestamp": "2024-05-14T15:30:00Z"
-}
-```
-
-#### Metrics (Prometheus)
-```bash
-GET /metrics
-
-# Response: 200 OK (Prometheus text format)
-# vm_operations_total{operation="create",status="success"} 5
-# vm_operations_total{operation="create",status="failure"} 1
-# volume_operations_total{operation="attach",status="success"} 3
-```
-
-### Error Handling
-
-All errors follow a consistent contract:
-
-```bash
-# Example: VM not found
-GET /api/v1/vms/invalid-id
-
-# Response: 404 Not Found
-{
-  "error_code": "VM_NOT_FOUND",
-  "message": "VM with id 'invalid-id' not found",
-  "details": {
-    "requested_id": "invalid-id",
-    "available_operations": ["create", "list"]
-  },
-  "timestamp": "2024-05-14T15:30:00Z"
-}
-
-# Example: Invalid request
-POST /api/v1/vms
-{
-  "name": ""  # Empty name
-}
-
-# Response: 422 Unprocessable Entity
-{
-  "error_code": "VALIDATION_ERROR",
-  "message": "Request validation failed",
-  "details": {
-    "field_errors": [
-      {
-        "field": "name",
-        "error": "String should have at least 1 character",
-        "value": ""
-      }
-    ]
-  },
-  "timestamp": "2024-05-14T15:30:00Z"
-}
-```
-
-**Complete API documentation available at**: `/docs` (Swagger UI) or `/redoc` (ReDoc)
-
----
-
-## Architecture
-
-### System Design
+### System Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -425,25 +221,31 @@ POST /api/v1/vms
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────────────────────────────────────────────────┐   │
-│  │              API Routes Layer                        │   │
-│  │  (Request validation, OpenAPI docs, HTTP responses) │   │
+│  │  API Routes (Request/Response, OpenAPI docs)         │   │
+│  │  GET    /api/v1/vms                                  │   │
+│  │  POST   /api/v1/vms                                  │   │
+│  │  GET    /api/v1/vms/{id}                             │   │
+│  │  POST   /api/v1/vms/{id}/start                       │   │
+│  │  POST   /api/v1/vms/{id}/stop                        │   │
+│  │  DELETE /api/v1/vms/{id}                             │   │
 │  └──────────────────────┬───────────────────────────────┘   │
 │                         │                                    │
 │  ┌──────────────────────▼───────────────────────────────┐   │
-│  │          Service Layer (Business Logic)             │   │
-│  │  (VMService, VolumeService - orchestration)         │   │
-│  │  (Error handling, state validation, retries)        │   │
+│  │  Service Layer (Business Logic)                      │   │
+│  │  - VMService: orchestration, validation              │   │
+│  │  - VolumeService: storage operations                 │   │
+│  │  - Error handling, retries, state management         │   │
 │  └──────────────────────┬───────────────────────────────┘   │
 │                         │                                    │
 │  ┌──────────────────────▼───────────────────────────────┐   │
-│  │        Provider Abstraction Layer                    │   │
-│  │  (Interface for infrastructure operations)          │   │
+│  │  Provider Abstraction (Infrastructure)               │   │
+│  │  OpenStackProvider (base interface)                  │   │
 │  └──────────────────────┬───────────────────────────────┘   │
 │                    ┌────┴────┐                              │
 │                    │          │                              │
 │        ┌───────────▼──┐  ┌──▼──────────────┐               │
-│        │ Mock Provider│  │ OpenStack        │               │
-│        │ (In-Memory)  │  │ Provider (OVH)   │               │
+│        │ MockProvider │  │ OpenStackProv.  │               │
+│        │ (In-Memory)  │  │ (Real OVH)      │               │
 │        └──────────────┘  └──────────────────┘               │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
@@ -456,82 +258,79 @@ POST /api/v1/vms
       └─────────────┘           └─────────────────┘
 ```
 
-### Project Structure
+### Project Structure (As Built)
 
 ```
 app/
-├── main.py                 # FastAPI app entry point
+├── __init__.py
+├── main.py                 # FastAPI application entry point
 ├── api/
+│   ├── __init__.py
 │   ├── routes/
-│   │   ├── vms.py         # VM CRUD endpoints
+│   │   ├── __init__.py
+│   │   ├── vms.py         # VM CRUD + lifecycle endpoints
 │   │   └── volumes.py     # Volume management endpoints
 │   └── schemas/
-│       ├── vm.py          # VM request/response models
+│       ├── __init__.py
+│       ├── vm.py          # VM request/response Pydantic models
 │       ├── volume.py      # Volume request/response models
-│       └── responses.py   # Common response models
+│       └── responses.py   # Common response structures
 ├── services/
+│   ├── __init__.py
 │   ├── vm_service.py      # VM business logic
 │   ├── volume_service.py  # Volume business logic
-│   └── exceptions.py      # Service-level exceptions
+│   └── exceptions.py      # Service layer exceptions
 ├── providers/
+│   ├── __init__.py
 │   ├── base.py            # Abstract provider interface
-│   ├── mock_provider.py   # Mock implementation
+│   ├── mock_provider.py   # Mock OpenStack implementation
 │   └── openstack_provider.py  # Real OVH implementation
 ├── core/
+│   ├── __init__.py
 │   ├── config.py          # Configuration (Pydantic Settings)
 │   ├── exceptions.py      # Custom exception hierarchy
-│   ├── logging.py         # Structured logging setup
+│   ├── logging.py         # Logging setup
 │   └── models.py          # Domain models (VM, Volume, etc)
 └── utils/
-    └── validators.py      # Common validators
+    ├── __init__.py
+    └── validators.py      # Validation utilities
 
 tests/
+├── __init__.py
 ├── conftest.py            # Pytest fixtures
 ├── unit/
+│   ├── __init__.py
 │   ├── test_vm_service.py
 │   ├── test_volume_service.py
 │   └── test_schemas.py
 ├── integration/
+│   ├── __init__.py
 │   ├── test_vm_endpoints.py
 │   ├── test_volume_endpoints.py
 │   └── test_error_handling.py
 └── fixtures/
+    ├── __init__.py
     ├── mock_responses.py
     └── test_data.py
-```
 
-### Data Flow: Creating a VM
+docs/
+├── README.md              # This file
+├── ARCHITECTURE.md        # Design patterns and decisions (planned)
+└── ROADMAP.md            # Vision and backlog (planned)
 
-```
-1. HTTP Request
-   POST /api/v1/vms
-   {
-     "name": "web-server-01",
-     "image_id": "...",
-     "flavor_id": "2"
-   }
-   
-2. FastAPI Route Handler
-   ├─ Pydantic validation (automatic)
-   ├─ Parse CreateVMRequest
-   └─ Call vm_service.create_vm()
-   
-3. Service Layer (VMService)
-   ├─ Validate business logic
-   │  ├─ Check name doesn't already exist
-   │  ├─ Validate flavor_id exists
-   │  └─ Validate image_id exists
-   ├─ Call provider.create_server()
-   └─ Catch provider exceptions → convert to HTTPException
-   
-4. Provider Layer (Mock or OpenStack)
-   ├─ Mock: Add to in-memory dict, return VM object
-   └─ OpenStack: Call openstacksdk, handle retries, map response
-   
-5. Response
-   ├─ Service returns VM object
-   ├─ Route serializes to Pydantic VMResponse
-   └─ FastAPI returns 201 Created + JSON
+.github/
+├── workflows/            # GitHub Actions (optional)
+
+.gitlab/
+├── .gitlab-ci.yml        # GitLab CI/CD pipeline
+
+Dockerfile
+docker-compose.yml
+pyproject.toml
+pytest.ini
+.env.example
+.gitignore
+LICENSE
 ```
 
 ---
@@ -540,159 +339,102 @@ tests/
 
 ### 1. Provider Abstraction Pattern
 
-**Decision**: Separate provider interface from business logic
+**Decision**: Separate infrastructure operations behind an abstract interface
 
-**Rationale**:
-- **Testability**: Use mock provider for fast tests without OVH credentials
-- **Flexibility**: Swap providers (mock → real OpenStack → future cloud)
-- **Maintainability**: OpenStack-specific logic isolated in one place
-- **Multi-cloud future**: Easy to add AWS, Azure, GCP providers later
+**Why**: 
+- **Testability**: Mock provider works without real OpenStack
+- **Flexibility**: Easy to add new cloud providers later
+- **Isolation**: OpenStack-specific logic stays in one place
 
-**Trade-off**: Slight additional abstraction layer complexity, but gains far outweigh cost
+**Implementation**:
+```python
+# Base interface
+class OpenStackProvider(ABC):
+    async def create_server(spec: ServerSpec) -> Server
+    async def list_servers() -> List[Server]
+    # ... etc
+
+# Mock for testing
+class MockOpenStackProvider(OpenStackProvider):
+    def __init__(self):
+        self.servers = {}  # In-memory storage
+
+# Real for production
+class RealOpenStackProvider(OpenStackProvider):
+    def __init__(self, conn):
+        self.conn = openstack.connect()
+```
 
 ### 2. Service Layer for Business Logic
 
-**Decision**: Separate API routes from business logic via services
+**Decision**: Separate API routes from business logic
 
-**Rationale**:
-- **Reusability**: Services can be called from CLI, RPC, webhooks, etc.
-- **Testability**: Test business logic independent of HTTP framework
-- **Maintainability**: Routes stay thin and focused on HTTP concerns
-- **Clarity**: Clear separation of concerns
+**Why**:
+- **Reusability**: Services work from CLI, webhooks, RPC, etc.
+- **Testability**: Test business logic independent of HTTP
+- **Clarity**: Routes stay thin, services handle orchestration
+- **Maintainability**: Changes in business logic don't affect API
 
 **Example**:
 ```python
-# Routes are thin:
+# Route: just HTTP
 @app.post("/api/v1/vms")
 async def create_vm(req: CreateVMRequest):
     return await vm_service.create_vm(req)
 
-# Business logic in service:
+# Service: business logic
 class VMService:
     async def create_vm(self, spec: CreateVMRequest) -> VM:
         # Validation, orchestration, error handling
         return await self.provider.create_server(...)
 ```
 
-### 3. Pydantic for Validation and Serialization
+### 3. Pydantic for Validation
 
-**Decision**: Use Pydantic models for all request/response contracts
+**Decision**: Use Pydantic for all request/response models
 
-**Rationale**:
+**Why**:
 - **Automatic validation**: Type checking + custom validators
-- **OpenAPI generation**: Auto-generated Swagger docs
-- **Serialization**: Automatic JSON → Python → JSON conversion
+- **OpenAPI docs**: Auto-generated Swagger/ReDoc
+- **Serialization**: Automatic JSON conversion
 - **Type safety**: IDE support, mypy compatibility
 
-### 4. Async/Await for I/O Operations
+### 4. Async/Await Throughout
 
-**Decision**: Use async/await patterns throughout
+**Decision**: Use async/await for all I/O operations
 
-**Rationale**:
-- **Performance**: Non-blocking I/O, handle many requests concurrently
-- **Scalability**: Hundreds of concurrent connections on single server
-- **Natural**: Matches OpenStack SDK's async operations
+**Why**:
+- **Scalability**: Handle thousands of concurrent requests
+- **Performance**: Non-blocking I/O, efficient resource usage
+- **Modern**: Matches FastAPI and OpenStack SDK async operations
 
 ### 5. Custom Exception Hierarchy
 
-**Decision**: Separate exception types for precise error handling
+**Decision**: Specific exception types for each error scenario
 
-**Rationale**:
-- **Precision**: Catch specific errors, handle appropriately
+**Why**:
+- **Precision**: Catch and handle specific errors
 - **API clarity**: Map exceptions to correct HTTP status codes
-- **Observability**: Different exceptions → different log levels
-- **Testing**: Mock exceptions for error scenarios
+- **Observability**: Different exceptions log differently
 
-**Examples**:
-```python
-class OpenStackError(Exception): pass           # Base
-class VMNotFoundError(OpenStackError): pass     # 404
-class VMAlreadyExistsError(OpenStackError): pass # 409
-class ProviderConnectionError(OpenStackError): pass # 503
-```
+### 6. Environment-Based Configuration
 
-### 6. Dependency Injection (Manual Pattern)
+**Decision**: Configuration via environment variables and .env files
 
-**Decision**: Inject dependencies explicitly, no heavy DI framework
+**Why**:
+- **12-factor compliance**: Config separate from code
+- **Flexibility**: Different configs per environment (dev/staging/prod)
+- **Security**: Secrets don't live in code
+- **Type-safe**: Pydantic validates at startup
 
-**Rationale**:
-- **Explicit**: Clear what depends on what
-- **Testable**: Easy to mock dependencies
-- **Simple**: No magic, no learning curve for new developers
-- **Lightweight**: No runtime framework overhead
+### 7. Structured Logging
 
-**Example**:
-```python
-# At app startup
-provider = get_provider()  # Based on config
-vm_service = VMService(provider)
-volume_service = VolumeService(provider)
+**Decision**: Contextual logging with JSON structure
 
-# In routes
-@app.post("/api/v1/vms")
-async def create_vm(req: CreateVMRequest):
-    return await vm_service.create_vm(req)  # Injected at startup
-```
-
-### 7. Configuration via Environment Variables
-
-**Decision**: Use Pydantic Settings for configuration
-
-**Rationale**:
-- **12-factor compliance**: Configuration via env vars
-- **Type-safe**: Validated at startup
-- **Flexible**: Override per deployment (dev, staging, prod)
-- **Secret-friendly**: Can inject from secret management
-
-**Example**:
-```python
-# config.py
-class Settings(BaseSettings):
-    provider: str = "mock"  # "mock" or "openstack"
-    log_level: str = "INFO"
-    openstack_auth_url: str | None = None
-    openstack_project_id: str | None = None
-    
-# Usage
-settings = Settings()
-provider = get_provider(settings)
-```
-
-### 8. Error Responses with Context
-
-**Decision**: Include structured error details in responses
-
-**Rationale**:
-- **Debugging**: Clients understand what went wrong
-- **Automation**: Clients can parse error codes for retries
-- **User experience**: Helpful messages, not cryptic codes
-
-**Example**:
-```json
-{
-  "error_code": "VALIDATION_ERROR",
-  "message": "Request validation failed",
-  "details": {
-    "field_errors": [
-      {
-        "field": "name",
-        "error": "String should have at least 1 character"
-      }
-    ]
-  },
-  "timestamp": "2024-05-14T15:30:00Z"
-}
-```
-
-### 9. Structured Logging
-
-**Decision**: Use structured logging with context, not plain strings
-
-**Rationale**:
-- **Parseable**: Machine-readable logs for log aggregation
-- **Contextual**: Request ID, user, operation type for tracing
-- **Observable**: Can aggregate, filter, alert on logs
-- **Production-ready**: Scales to multi-service deployments
+**Why**:
+- **Observability**: Machine-readable logs for aggregation
+- **Debugging**: Full context for each operation
+- **Production**: Scales to multi-service deployments
 
 ---
 
@@ -700,12 +442,18 @@ provider = get_provider(settings)
 
 ### Environment Variables
 
-Create a `.env` file (or set in deployment):
+Create a `.env` file in the project root:
 
 ```bash
-# Provider configuration
+# Provider mode
 PROVIDER=mock                          # or "openstack" for real OVH
+
+# Logging
 LOG_LEVEL=INFO                         # DEBUG, INFO, WARNING, ERROR
+
+# API configuration
+API_HOST=0.0.0.0
+API_PORT=8000
 
 # OpenStack credentials (required if PROVIDER=openstack)
 OS_AUTH_URL=https://auth.cloud.ovh.net/v3
@@ -715,532 +463,189 @@ OS_USERNAME=your_username
 OS_PASSWORD=your_password
 OS_USER_DOMAIN_NAME=Default
 OS_PROJECT_DOMAIN_NAME=Default
-OS_REGION_NAME=SBG5                    # Or your region
-
-# Optional
-API_PORT=8000
-API_HOST=0.0.0.0
-WORKERS=4                              # Number of uvicorn workers
+OS_REGION_NAME=SBG5
 ```
 
-### Obtaining OVH OpenStack Credentials
+### OVH OpenStack Setup
 
-1. Log in to [OVH Manager](https://ca.ovh.com/manager)
-2. Navigate to **Public Cloud** → **Your Project**
-3. Go to **Users & Roles**
-4. Create or select an OpenStack user
-5. Download **openrc.sh** (OpenStack RC file)
-6. Source it: `source openrc.sh`
+1. Create account at [OVH Public Cloud](https://www.ovhcloud.com/en/public-cloud/)
+2. Create a project
+3. Go to **Users & Roles** → Create OpenStack user
+4. Download **openrc.sh** file
+5. Source it: `source openrc.sh`
 
-This sets all required environment variables.
-
-### Docker Configuration
-
-The service is containerized and can be deployed anywhere:
-
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY pyproject.toml poetry.lock .
-RUN pip install poetry && poetry install --no-dev
-COPY app/ .
-EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-### Running with Docker Compose
-
-```yaml
-version: '3.8'
-
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      PROVIDER: mock
-      LOG_LEVEL: DEBUG
-    volumes:
-      - .:/app
-```
+All environment variables are now set automatically.
 
 ---
 
-## Usage Examples
+## API Endpoints
 
-### Using Python Requests
+### Planned Endpoints
 
-```python
-import requests
-
-BASE_URL = "http://localhost:8000/api/v1"
-
-# Create a VM
-response = requests.post(f"{BASE_URL}/vms", json={
-    "name": "web-server-01",
-    "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
-    "flavor_id": "2",
-    "network_ids": ["net-internal"]
-})
-vm = response.json()
-vm_id = vm["id"]
-
-# List VMs
-response = requests.get(f"{BASE_URL}/vms")
-vms = response.json()
-
-# Get VM details
-response = requests.get(f"{BASE_URL}/vms/{vm_id}")
-vm = response.json()
-
-# Start VM
-response = requests.post(f"{BASE_URL}/vms/{vm_id}/start")
-
-# Stop VM
-response = requests.post(f"{BASE_URL}/vms/{vm_id}/stop")
-
-# Delete VM
-response = requests.delete(f"{BASE_URL}/vms/{vm_id}")
+#### VM Lifecycle
+```
+POST   /api/v1/vms              Create VM
+GET    /api/v1/vms              List VMs
+GET    /api/v1/vms/{id}         Get VM details
+POST   /api/v1/vms/{id}/start   Start VM
+POST   /api/v1/vms/{id}/stop    Stop VM
+POST   /api/v1/vms/{id}/reboot  Reboot VM
+DELETE /api/v1/vms/{id}         Delete VM
 ```
 
-### Using cURL
+#### Volume Management
+```
+POST   /api/v1/volumes                      Create volume
+GET    /api/v1/volumes                      List volumes
+GET    /api/v1/volumes/{id}                 Get volume details
+POST   /api/v1/volumes/{id}/snapshot        Create snapshot
+POST   /api/v1/vms/{vm_id}/volumes/{vol_id}/attach    Attach volume
+POST   /api/v1/vms/{vm_id}/volumes/{vol_id}/detach    Detach volume
+DELETE /api/v1/volumes/{id}                 Delete volume
+```
+
+#### Health & Status
+```
+GET    /health                  Health check
+GET    /metrics                 Prometheus metrics (planned)
+```
+
+### Example Request/Response (When Implemented)
 
 ```bash
 # Create VM
-curl -X POST http://localhost:8000/api/v1/vms \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "web-server-01",
-    "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
-    "flavor_id": "2"
-  }'
-
-# List VMs
-curl http://localhost:8000/api/v1/vms
-
-# Get VM
-curl http://localhost:8000/api/v1/vms/{vm_id}
-
-# Start VM
-curl -X POST http://localhost:8000/api/v1/vms/{vm_id}/start
-
-# Stop VM
-curl -X POST http://localhost:8000/api/v1/vms/{vm_id}/stop
-
-# Delete VM
-curl -X DELETE http://localhost:8000/api/v1/vms/{vm_id}
-```
-
-### Using Python SDK (Planned Future)
-
-```python
-# Planned: OpenStack VM Orchestrator Python client
-from openstack_orchestrator import VirtualMachineClient
-
-client = VirtualMachineClient(base_url="http://localhost:8000")
-
-vm = client.create_vm(
-    name="web-server-01",
-    image_id="...",
-    flavor_id="2"
-)
-
-client.start_vm(vm.id)
-client.stop_vm(vm.id)
-client.delete_vm(vm.id)
-```
-
----
-
-## Testing
-
-### Running Tests
-
-```bash
-# Install test dependencies
-poetry install --with dev
-
-# Run all tests with coverage
-pytest --cov=app --cov-report=html --cov-report=term
-
-# Run specific test file
-pytest tests/unit/test_vm_service.py
-
-# Run with verbose output
-pytest -v
-
-# Run only fast unit tests (skip integration)
-pytest tests/unit/
-
-# Run only integration tests
-pytest tests/integration/
-```
-
-### Test Structure
-
-```
-tests/
-├── conftest.py                 # Shared fixtures
-├── unit/
-│   ├── test_vm_service.py     # Service business logic
-│   ├── test_volume_service.py
-│   └── test_schemas.py         # Pydantic validation
-├── integration/
-│   ├── test_vm_endpoints.py    # API endpoints
-│   ├── test_volume_endpoints.py
-│   └── test_error_handling.py
-└── fixtures/
-    ├── mock_responses.py       # Mock data
-    └── test_data.py
-```
-
-### Example Unit Test
-
-```python
-# tests/unit/test_vm_service.py
-import pytest
-from app.services.vm_service import VMService
-from app.providers.mock_provider import MockOpenStackProvider
-from app.api.schemas.vm import CreateVMRequest
-
-@pytest.fixture
-def provider():
-    return MockOpenStackProvider()
-
-@pytest.fixture
-def service(provider):
-    return VMService(provider)
-
-@pytest.mark.asyncio
-async def test_create_vm_success(service):
-    """Test successful VM creation"""
-    request = CreateVMRequest(
-        name="test-vm",
-        image_id="img-123",
-        flavor_id="2"
-    )
-    
-    vm = await service.create_vm(request)
-    
-    assert vm.name == "test-vm"
-    assert vm.status == "BUILDING"
-    assert vm.id is not None
-
-@pytest.mark.asyncio
-async def test_create_vm_name_already_exists(service):
-    """Test VM creation with duplicate name fails"""
-    request = CreateVMRequest(
-        name="test-vm",
-        image_id="img-123",
-        flavor_id="2"
-    )
-    
-    # First creation succeeds
-    await service.create_vm(request)
-    
-    # Second creation with same name fails
-    with pytest.raises(VMAlreadyExistsError):
-        await service.create_vm(request)
-```
-
-### Example Integration Test
-
-```python
-# tests/integration/test_vm_endpoints.py
-import pytest
-from fastapi.testclient import TestClient
-from app.main import app
-
-client = TestClient(app)
-
-def test_create_vm_endpoint():
-    """Test VM creation via HTTP endpoint"""
-    response = client.post("/api/v1/vms", json={
-        "name": "test-vm",
-        "image_id": "img-123",
-        "flavor_id": "2"
-    })
-    
-    assert response.status_code == 201
-    data = response.json()
-    assert data["name"] == "test-vm"
-    assert data["status"] == "BUILDING"
-
-def test_list_vms_endpoint():
-    """Test listing VMs via HTTP endpoint"""
-    # Create a VM first
-    client.post("/api/v1/vms", json={
-        "name": "test-vm",
-        "image_id": "img-123",
-        "flavor_id": "2"
-    })
-    
-    # List VMs
-    response = client.get("/api/v1/vms")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data["items"]) > 0
-```
-
-### Coverage Target
-
-Target: **80%+ code coverage** with focus on:
-- ✓ Service layer business logic
-- ✓ Error handling paths
-- ✓ API response contracts
-- ✓ Schema validation
-- ✓ Edge cases
-
----
-
-## DevOps & Deployment
-
-### Docker Build
-
-```bash
-# Build image
-docker build -t openstack-vm-orchestrator:latest .
-
-# Run container
-docker run -p 8000:8000 \
-  -e PROVIDER=mock \
-  -e LOG_LEVEL=INFO \
-  openstack-vm-orchestrator:latest
-```
-
-### Docker Compose
-
-```bash
-# Start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f api
-
-# Stop services
-docker-compose down
-```
-
-### GitLab CI/CD Pipeline
-
-The project includes `.gitlab-ci.yml` for automated testing and deployment:
-
-```yaml
-stages:
-  - test
-  - build
-  - deploy
-
-test:
-  stage: test
-  script:
-    - pip install poetry
-    - poetry install
-    - pytest --cov=app --cov-report=term
-
-build:
-  stage: build
-  script:
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-
-deploy:
-  stage: deploy
-  script:
-    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-    - docker run -d -p 8000:8000 $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-```
-
----
-
-## Monitoring & Observability
-
-### Structured Logging
-
-All operations are logged with context:
-
-```python
-# Example: Creating VM
-logger.info(
-    "vm_create_started",
-    vm_name="web-server-01",
-    image_id="...",
-    request_id="req-123"
-)
-
-# On success
-logger.info(
-    "vm_create_succeeded",
-    vm_id="vm-456",
-    duration_ms=1200,
-    request_id="req-123"
-)
-
-# On error
-logger.error(
-    "vm_create_failed",
-    error_code="INVALID_IMAGE",
-    error_message="Image not found",
-    request_id="req-123"
-)
-```
-
-### Prometheus Metrics
-
-Ready for integration (implementation in phase 2):
-
-```
-vm_operations_total{operation="create",status="success"} 5
-vm_operations_total{operation="create",status="failure"} 1
-vm_operations_duration_seconds_bucket{operation="create",le="1"} 3
-volume_operations_total{operation="attach",status="success"} 3
-provider_response_time_seconds{provider="openstack",endpoint="servers"} 0.234
-```
-
-### Health Checks
-
-```bash
-GET /health
+POST /api/v1/vms
+Content-Type: application/json
 
 {
-  "status": "healthy",
-  "version": "0.1.0",
-  "provider": "mock",
-  "timestamp": "2024-05-14T15:30:00Z"
+  "name": "web-server-01",
+  "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
+  "flavor_id": "2"
+}
+
+# Response: 201 Created
+{
+  "id": "vm-123",
+  "name": "web-server-01",
+  "status": "BUILDING",
+  "created_at": "2024-05-14T15:30:00Z"
 }
 ```
 
 ---
 
-## Project Roadmap
+## Testing Strategy
 
-### Phase 1: Core VM Management ✓ (Current)
-- [x] VM CRUD operations (create, list, get, delete)
-- [x] VM lifecycle (start, stop, reboot)
-- [x] Pydantic schemas and validation
-- [x] Mock provider for testing
-- [x] Unit and integration tests
-- [x] Basic error handling
-- [x] API documentation (Swagger/ReDoc)
-- [x] Docker setup
+### Unit Tests
 
-### Phase 2: Storage & Volumes (Planned)
-- [ ] Volume CRUD operations
-- [ ] Volume snapshot creation and management
-- [ ] Volume attach/detach to VMs
-- [ ] Multi-attach scenarios
-- [ ] Volume backup strategy
-- [ ] Integration tests
+Test service logic in isolation with mock provider:
 
-### Phase 3: Advanced Compute (Planned)
-- [ ] Flavor/instance type querying
-- [ ] Image catalog browsing
-- [ ] Network management (neutron)
-- [ ] Security group management
-- [ ] Key pair management
-- [ ] Metadata and tagging
+```python
+@pytest.mark.asyncio
+async def test_create_vm_success():
+    provider = MockOpenStackProvider()
+    service = VMService(provider)
+    
+    vm = await service.create_vm(CreateVMRequest(...))
+    assert vm.name == "test-vm"
+    assert vm.status == "BUILDING"
+```
 
-### Phase 4: Operational Excellence (Planned)
-- [ ] Comprehensive Prometheus metrics
-- [ ] Request tracing (OpenTelemetry)
-- [ ] Authentication & authorization (OAuth2)
-- [ ] Rate limiting per API key
-- [ ] Request/response logging
-- [ ] SLA monitoring
+### Integration Tests
 
-### Phase 5: Advanced Features (Future)
-- [ ] Async job queue (RabbitMQ/Celery)
-- [ ] Workflow orchestration (DAGs)
-- [ ] Multi-region support
-- [ ] Cross-cloud provider abstraction
-- [ ] Cost tracking and FinOps
-- [ ] Machine learning for resource recommendations
+Test API endpoints with TestClient:
 
-### Backlog
+```python
+def test_create_vm_endpoint():
+    response = client.post("/api/v1/vms", json={...})
+    assert response.status_code == 201
+```
 
-- [ ] Python SDK client library
-- [ ] Terraform provider
-- [ ] Ansible modules
-- [ ] Migration tools (VMware → OpenStack)
-- [ ] Capacity planning API
-- [ ] Disaster recovery workflows
-- [ ] Kubernetes operator integration
+### Coverage Target
+
+**80%+ coverage** focusing on:
+- Service business logic
+- Error handling paths
+- API response contracts
+- Schema validation
+
+### Running Tests
+
+```bash
+# All tests
+pytest --cov=app --cov-report=html
+
+# Specific test file
+pytest tests/unit/test_vm_service.py -v
+
+# With verbose output
+pytest -v
+```
+
+---
+
+## Next Steps
+
+### Immediate (Phase 2)
+
+1. ✅ Create project structure scaffold
+2. ✅ Write ARCHITECTURE.md (design patterns in depth)
+3. ✅ Write ROADMAP.md (vision and backlog)
+4. ✅ Create pyproject.toml (dependencies)
+5. ✅ Implement domain models and Pydantic schemas
+6. ✅ Build provider abstraction and mock implementation
+7. ✅ Create FastAPI application and routes
+8. ✅ Add error handling and logging
+
+### Then (Phase 3)
+
+9. ✅ Write comprehensive tests
+10. ✅ Verify 80%+ coverage
+11. ✅ Test with real OVH OpenStack
+
+### Finally (Phase 4-5)
+
+12. ✅ Dockerize application
+13. ✅ Create CI/CD pipeline
+14. ✅ Finalize documentation
+15. ✅ Code review and polish
 
 ---
 
 ## Contributing
 
-### Development Setup
+This is an interview assignment. Development follows SDLC best practices:
 
-```bash
-# Fork and clone
-git clone https://github.com/yourusername/openstack-ovh-vm-orchestrator.git
-cd openstack-ovh-vm-orchestrator
+1. **Design first**: Document decisions in ARCHITECTURE.md
+2. **Test-driven**: Write tests alongside implementation
+3. **Incremental**: Build and test each phase
+4. **Document**: Update this README as implementation progresses
+5. **Review**: Code review before each phase completion
 
-# Create feature branch
-git checkout -b feature/your-feature
+---
 
-# Install with dev dependencies
-poetry install --with dev
+## Project Status Summary
 
-# Run tests before committing
-pytest --cov=app
-```
+| Area | Status | Notes |
+|------|--------|-------|
+| Documentation | 🟢 In Progress | README, ARCHITECTURE, ROADMAP |
+| Project Structure | 🟡 Ready | Scaffold created |
+| API Implementation | ⚪ Pending | Starts Phase 2 |
+| Testing | ⚪ Pending | After implementation |
+| DevOps | ⚪ Pending | Final phases |
 
-### Code Standards
-
-- **Type hints**: All functions must have type hints
-- **Docstrings**: All public functions should have docstrings
-- **Tests**: New features must include tests (target 80%+ coverage)
-- **Linting**: Code formatted with `black`, linted with `ruff`
-- **Async**: Use async/await for I/O operations
-
-### Commit Convention
-
-```
-<type>: <subject>
-
-<body>
-
-Closes #<issue>
-```
-
-Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
-
-### Pull Request Process
-
-1. Create branch from `main`
-2. Make changes with tests
-3. Ensure tests pass: `pytest --cov=app`
-4. Create PR with description of changes
-5. Address code review feedback
-6. Merge when approved
+**Last Updated**: May 14, 2024
 
 ---
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - See LICENSE file for details
 
 ---
 
-## Support
+## Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/jafarijason/openstack-ovh-vm-orchestrator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jafarijason/openstack-ovh-vm-orchestrator/discussions)
-- **Documentation**: See `/docs` directory
-
----
-
-## Acknowledgments
-
-Built with:
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
-- [OpenStack SDK](https://docs.openstack.org/openstacksdk/) - Python bindings for OpenStack
-- [Pydantic](https://docs.pydantic.dev/) - Data validation using Python type hints
-- [OVH Public Cloud](https://www.ovhcloud.com/en/public-cloud/) - OpenStack infrastructure provider
-
----
-
-**Author**: Jason Jafari | **Date**: May 2024 | **Version**: 0.1.0 (PoC)
+- **Repository**: [GitHub](https://github.com/jafarijason/openstack-ovh-vm-orchestrator)
+- **Issues**: [Bug reports and feature requests](https://github.com/jafarijason/openstack-ovh-vm-orchestrator/issues)
+- **Author**: Jason Afari
