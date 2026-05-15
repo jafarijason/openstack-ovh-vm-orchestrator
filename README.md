@@ -251,7 +251,6 @@ npm run dev
 - Frontend: http://localhost:5174
 - API: http://localhost:8000
 - API Docs: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
 
 ### Setup - Docker Compose
 
