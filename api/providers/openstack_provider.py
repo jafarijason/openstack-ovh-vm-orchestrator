@@ -256,8 +256,9 @@ class OpenStackProvider(BaseProvider):
         """Delete VM from OpenStack."""
         try:
             compute = self.engine.get_compute()
-            result = compute.delete_server(vm_id, wait=False)
-            return result is not False
+            # Note: OVH OpenStack SDK doesn't support 'wait' parameter on delete_server
+            result = compute.delete_server(vm_id)
+            return True
         except Exception as e:
             if "not found" in str(e).lower():
                 return False
