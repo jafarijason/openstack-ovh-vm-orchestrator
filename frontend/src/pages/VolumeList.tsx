@@ -4,6 +4,7 @@ import { volumeService } from "@/services/volumeService"
 import { useCloudStore } from "@/stores/cloudStore"
 import { LoadingSpinner } from "@/components/common/LoadingSpinner"
 import { ErrorAlert } from "@/components/common/ErrorAlert"
+import { MetadataViewer } from "@/components/common/MetadataViewer"
 
 type VolumeResponse = components["schemas"]["VolumeResponse"]
 type CreateVolumeRequest = components["schemas"]["CreateVolumeRequest"]
@@ -28,6 +29,7 @@ export const VolumeList: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
+  const [expandedVolumeId, setExpandedVolumeId] = useState<string | null>(null)
 
    const loadVolumes = async (cloud: string) => {
      try {
@@ -375,9 +377,31 @@ export const VolumeList: React.FC = () => {
                   </div>
                 )}
 
+                {/* Metadata Viewer */}
+                {expandedVolumeId === volume.id && (
+                  <div className="mb-4 pt-4 border-t border-gray-200">
+                    <MetadataViewer
+                      metadata={volume.metadata}
+                      name={`Metadata - ${volume.name}`}
+                    />
+                  </div>
+                )}
+
                 {/* Actions */}
                 {deleteConfirm !== volume.id && (
                   <div className="flex gap-2 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() =>
+                        setExpandedVolumeId(
+                          expandedVolumeId === volume.id ? null : volume.id
+                        )
+                      }
+                      className="flex-1 text-sm px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-medium"
+                    >
+                      {expandedVolumeId === volume.id
+                        ? "Hide Metadata"
+                        : "View Metadata"}
+                    </button>
                     <button
                       onClick={() => setDeleteConfirm(volume.id)}
                       disabled={deletingIds.has(volume.id)}

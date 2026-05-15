@@ -43,6 +43,18 @@ class SnapshotStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class ImageStatus(str, Enum):
+    """Image lifecycle status."""
+    QUEUED = "QUEUED"
+    SAVING = "SAVING"
+    ACTIVE = "ACTIVE"
+    KILLED = "KILLED"
+    DELETED = "DELETED"
+    PENDING_DELETE = "PENDING_DELETE"
+    DEACTIVATED = "DEACTIVATED"
+    UNKNOWN = "UNKNOWN"
+
+
 @dataclass
 class VolumeAttachment:
     """Volume attachment to a VM."""
@@ -69,6 +81,25 @@ class Volume:
     def is_attached(self) -> bool:
         """Check if volume is attached to any VM."""
         return len(self.attachments) > 0
+
+
+@dataclass
+class Image:
+    """Image domain model."""
+    id: str
+    name: str
+    status: ImageStatus
+    size_bytes: Optional[int] = None
+    disk_format: Optional[str] = None  # qcow2, raw, vmdk, etc.
+    container_format: Optional[str] = None  # bare, ovf, etc.
+    is_public: bool = False
+    is_protected: bool = False
+    min_disk_gb: Optional[int] = None
+    min_ram_mb: Optional[int] = None
+    description: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 @dataclass

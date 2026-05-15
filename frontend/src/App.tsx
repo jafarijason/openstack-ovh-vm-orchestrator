@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { VmList } from './pages/VmList';
 import { VolumeList } from './pages/VolumeList';
 import { SnapshotList } from './pages/SnapshotList';
+import { ImageList } from './pages/ImageList';
 import { Settings } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
 import { useCloudStore } from './stores/cloudStore';
@@ -31,6 +32,7 @@ export const App: React.FC = () => {
                 <Route path="/vms" element={<VmList />} />
                 <Route path="/volumes" element={<VolumeList />} />
                 <Route path="/snapshots" element={<SnapshotList />} />
+                <Route path="/images" element={<ImageList />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

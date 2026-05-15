@@ -30,8 +30,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.api.routes.vm import router as vm_router
 from api.api.routes.volume import router as volume_router, snapshot_router
+from api.api.routes.image import router as image_router
 from api.services.vm_service import VMService
 from api.services.volume_service import VolumeService
+from api.services.image_service import ImageService
 from api.providers.factory import create_provider, list_available_clouds
 from api.core.exceptions import OrchestratorException
 
@@ -42,6 +44,7 @@ logger = logging.getLogger(__name__)
 # Global service instances (will be initialized on startup)
 vm_service: VMService | None = None
 volume_service: VolumeService | None = None
+image_service: ImageService | None = None
 active_cloud: str | None = None  # Track which cloud is currently active
 
 
@@ -85,11 +88,13 @@ async def lifespan(fast_app: FastAPI):
         # Initialize services
         vm_service = VMService(provider)
         volume_service = VolumeService(provider)
+        image_service = ImageService(provider)
         logger.info(f"Services initialized successfully using cloud: {active_cloud}")
         
         # Store in app state
         fast_app.state.vm_service = vm_service
         fast_app.state.volume_service = volume_service
+        fast_app.state.image_service = image_service
         fast_app.state.active_cloud = active_cloud
         
         # Generate OpenAPI schema
@@ -192,6 +197,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 app.include_router(vm_router)
 app.include_router(volume_router)
 app.include_router(snapshot_router)
+app.include_router(image_router)
 
 
 # Cloud status endpoint

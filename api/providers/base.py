@@ -7,7 +7,7 @@ consistent interface and behavior.
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from api.core.models import VM, Volume, Snapshot
+from api.core.models import VM, Volume, Snapshot, Image
 
 
 class BaseProvider(ABC):
@@ -271,5 +271,19 @@ class BaseProvider(ABC):
 
         Returns:
             True if deleted, False if not found
+        """
+        pass
+
+    # Image Operations
+    @abstractmethod
+    async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:
+        """List all available images with pagination.
+
+        Args:
+            limit: Maximum number of results
+            offset: Number of results to skip
+
+        Returns:
+            Tuple of (list of images, total count)
         """
         pass

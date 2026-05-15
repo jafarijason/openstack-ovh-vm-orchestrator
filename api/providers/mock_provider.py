@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import uuid4
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, VolumeAttachment
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, VolumeAttachment
 from api.core.exceptions import NotFoundError, ConflictError, OperationNotAllowedError
 
 
@@ -21,7 +21,9 @@ class MockProvider(BaseProvider):
         self.vms: dict[str, VM] = {}
         self.volumes: dict[str, Volume] = {}
         self.snapshots: dict[str, Snapshot] = {}
+        self.images: dict[str, Image] = {}
         self._connected = True
+        self._initialize_sample_images()
 
     async def check_connection(self) -> bool:
         """Mock connection check always succeeds."""
@@ -257,3 +259,121 @@ class MockProvider(BaseProvider):
             return False
         del self.snapshots[snapshot_id]
         return True
+
+    # Image Operations
+    def _initialize_sample_images(self):
+        """Initialize mock provider with sample images."""
+        sample_images = [
+            Image(
+                id="img-ubuntu-20-04",
+                name="Ubuntu 20.04 LTS",
+                status=ImageStatus.ACTIVE,
+                disk_format="qcow2",
+                container_format="bare",
+                size_bytes=2147483648,  # 2GB
+                min_disk_gb=5,
+                min_ram_mb=512,
+                is_public=True,
+                metadata={
+                    "_raw": {
+                        "id": "img-ubuntu-20-04",
+                        "name": "Ubuntu 20.04 LTS",
+                        "status": "ACTIVE",
+                        "size": 2147483648,
+                        "disk_format": "qcow2",
+                        "container_format": "bare",
+                        "is_public": True,
+                        "protected": False,
+                        "min_disk": 5,
+                        "min_ram": 512,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=30),
+            ),
+            Image(
+                id="img-ubuntu-22-04",
+                name="Ubuntu 22.04 LTS",
+                status=ImageStatus.ACTIVE,
+                disk_format="qcow2",
+                container_format="bare",
+                size_bytes=3221225472,  # 3GB
+                min_disk_gb=5,
+                min_ram_mb=512,
+                is_public=True,
+                metadata={
+                    "_raw": {
+                        "id": "img-ubuntu-22-04",
+                        "name": "Ubuntu 22.04 LTS",
+                        "status": "ACTIVE",
+                        "size": 3221225472,
+                        "disk_format": "qcow2",
+                        "container_format": "bare",
+                        "is_public": True,
+                        "protected": False,
+                        "min_disk": 5,
+                        "min_ram": 512,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=20),
+            ),
+            Image(
+                id="img-debian-11",
+                name="Debian 11",
+                status=ImageStatus.ACTIVE,
+                disk_format="qcow2",
+                container_format="bare",
+                size_bytes=1610612736,  # 1.5GB
+                min_disk_gb=5,
+                min_ram_mb=512,
+                is_public=True,
+                metadata={
+                    "_raw": {
+                        "id": "img-debian-11",
+                        "name": "Debian 11",
+                        "status": "ACTIVE",
+                        "size": 1610612736,
+                        "disk_format": "qcow2",
+                        "container_format": "bare",
+                        "is_public": True,
+                        "protected": False,
+                        "min_disk": 5,
+                        "min_ram": 512,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=15),
+            ),
+            Image(
+                id="img-centos-7",
+                name="CentOS 7",
+                status=ImageStatus.ACTIVE,
+                disk_format="qcow2",
+                container_format="bare",
+                size_bytes=2684354560,  # 2.5GB
+                min_disk_gb=5,
+                min_ram_mb=512,
+                is_public=True,
+                metadata={
+                    "_raw": {
+                        "id": "img-centos-7",
+                        "name": "CentOS 7",
+                        "status": "ACTIVE",
+                        "size": 2684354560,
+                        "disk_format": "qcow2",
+                        "container_format": "bare",
+                        "is_public": True,
+                        "protected": False,
+                        "min_disk": 5,
+                        "min_ram": 512,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=45),
+            ),
+        ]
+        for image in sample_images:
+            self.images[image.id] = image
+
+    async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:
+        """List all mock images."""
+        images_list = list(self.images.values())
+        total = len(images_list)
+        return images_list[offset : offset + limit], total

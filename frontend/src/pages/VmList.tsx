@@ -3,6 +3,7 @@ import { vmService } from '../services/vmService';
 import { useCloudStore } from '../stores/cloudStore';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorAlert } from '../components/common/ErrorAlert';
+import { MetadataViewer } from '../components/common/MetadataViewer';
 import type { components } from '../types/api';
 
 type VMResponse = components['schemas']['VMResponse'];
@@ -20,6 +21,7 @@ export const VmList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
+  const [expandedVmId, setExpandedVmId] = useState<string | null>(null);
   const [createModal, setCreateModal] = useState<CreateModalState>({
     isOpen: false,
     formData: {
@@ -127,32 +129,68 @@ export const VmList: React.FC = () => {
     }
   };
 
-  const handleVMAction = async (
-    vmId: string,
-    action: 'start' | 'stop' | 'reboot'
-  ) => {
-    try {
-      setActionLoading((prev) => ({
-        ...prev,
-        [`${action}-${vmId}`]: true,
-      }));
+   const handleVMAction = async (
+     vmId: string,
+     action: 'start' | 'stop' | 'reboot'
+   ) => {
+     try {
+       setActionLoading((prev) => ({
+         ...prev,
+         [`${action}-${vmId}`]: true,
+       }));
 
-       await vmService.performVMAction(vmId, action, activeCloud);
-       await loadVMs(activeCloud); // Reload to get updated status
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : `Failed to ${action} VM`;
-      setError(errorMessage);
-    } finally {
-      setActionLoading((prev) => ({
-        ...prev,
-        [`${action}-${vmId}`]: false,
-      }));
+        await vmService.performVMAction(vmId, action, activeCloud);
+        await loadVMs(activeCloud); // Reload to get updated status
+     } catch (err) {
+       let errorMessage = `Failed to ${action} VM`;
+       if (err instanceof Error) {
+         // Handle specific error messages
+         if (err.message.includes('409') || err.message.includes('Conflict')) {
+           errorMessage = `VM is already being ${action === 'start' ? 'started' : action === 'stop' ? 'stopped' : 'rebooted'} or in a transitional state. Please wait a moment and try again.`;
+         } else {
+           errorMessage = err.message;
+         }
+       }
+       setError(errorMessage);
+     } finally {
+       setActionLoading((prev) => ({
+         ...prev,
+         [`${action}-${vmId}`]: false,
+       }));
+     }
+   };
+
+  const getActualVmState = (vm: VMResponse): string => {
+    // If status is UNKNOWN, try to use vm_state from raw metadata
+    if (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state) {
+      const rawState = vm.metadata._raw.vm_state.toLowerCase();
+      // Map OpenStack vm_state values to our status enum
+      if (rawState === 'active') return 'ACTIVE';
+      if (rawState === 'stopped') return 'STOPPED';
+      if (rawState === 'stopped') return 'STOPPED';
+      return vm.status;
     }
+    return vm.status;
+  };
+
+  const getDisplayStatus = (vm: VMResponse): { status: string; isRaw: boolean } => {
+    if (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state) {
+      return {
+        status: `${vm.metadata._raw.vm_state} (raw)`,
+        isRaw: true,
+      };
+    }
+    return {
+      status: vm.status,
+      isRaw: false,
+    };
   };
 
   const getStatusBadge = (status: string) => {
     const baseClass = 'inline-flex px-3 py-1 text-xs font-semibold rounded-full';
-    switch (status) {
+    // Handle raw state display
+    const cleanStatus = status.replace(' (raw)', '').toUpperCase();
+    switch (cleanStatus) {
       case 'ACTIVE':
         return `${baseClass} bg-green-100 text-green-800`;
       case 'STOPPED':
@@ -166,8 +204,9 @@ export const VmList: React.FC = () => {
     }
   };
 
-  const isActionDisabled = (status: string): boolean => {
-    return status === 'BUILDING' || status === 'DELETING' || status === 'UNKNOWN';
+  const isActionDisabled = (vm: VMResponse): boolean => {
+    const actualState = getActualVmState(vm);
+    return actualState === 'BUILDING' || actualState === 'DELETING';
   };
 
   return (
@@ -234,40 +273,55 @@ export const VmList: React.FC = () => {
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Image
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Flavor
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Networks
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
+             <table className="w-full">
+               <thead className="bg-gray-50 border-b border-gray-200">
+                 <tr>
+                   <th className="w-8 px-4 py-3"></th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                     Name
+                   </th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                     Status
+                   </th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                     Image
+                   </th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                     Flavor
+                   </th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                     Networks
+                   </th>
+                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                     Actions
+                   </th>
+                 </tr>
+               </thead>
+               <tbody className="divide-y divide-gray-200">
                 {vms.map((vm) => {
-                  const disabled = isActionDisabled(vm.status);
-                  return (
-                    <tr key={vm.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {vm.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={getStatusBadge(vm.status)}>{vm.status}</span>
-                      </td>
+                    const disabled = isActionDisabled(vm);
+                    const displayStatus = getDisplayStatus(vm);
+                    return (
+                      <React.Fragment key={vm.id}>
+                        <tr className="hover:bg-gray-50 cursor-pointer" onClick={() => setExpandedVmId(expandedVmId === vm.id ? null : vm.id)}>
+                          <td className="px-4 py-4 text-center">
+                            <span className="text-gray-400">
+                              {expandedVmId === vm.id ? '▼' : '▶'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {vm.name}
+                          </td>
+                       <td className="px-6 py-4 whitespace-nowrap">
+                         <div>
+                           <span className={getStatusBadge(displayStatus.status)}>{displayStatus.status}</span>
+                           {displayStatus.isRaw && vm.metadata?._raw?.vm_state && (
+                             <p className="text-xs text-gray-500 mt-1">
+                               from _raw.vm_state
+                             </p>
+                           )}
+                         </div>
+                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         <span className="truncate max-w-xs">{vm.image_id}</span>
                       </td>
@@ -277,14 +331,15 @@ export const VmList: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {vm.network_ids.length} network{vm.network_ids.length !== 1 ? 's' : ''}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          {vm.status === 'STOPPED' && (
-                            <button
-                              onClick={() => handleVMAction(vm.id, 'start')}
-                              disabled={disabled || actionLoading[`start-${vm.id}`]}
-                              className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                            >
+                       <td className="px-6 py-4 whitespace-nowrap">
+                         <div className="flex items-center gap-2">
+                           {(vm.status === 'STOPPED' || 
+                             (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state?.toLowerCase() === 'stopped')) && (
+                             <button
+                               onClick={() => handleVMAction(vm.id, 'start')}
+                               disabled={disabled || actionLoading[`start-${vm.id}`]}
+                               className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                             >
                               {actionLoading[`start-${vm.id}`] ? (
                                 <svg
                                   className="w-4 h-4 animate-spin"
@@ -318,13 +373,14 @@ export const VmList: React.FC = () => {
                             </button>
                           )}
 
-                          {vm.status === 'ACTIVE' && (
-                            <>
-                              <button
-                                onClick={() => handleVMAction(vm.id, 'stop')}
-                                disabled={disabled || actionLoading[`stop-${vm.id}`]}
-                                className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                              >
+                           {(vm.status === 'ACTIVE' ||
+                             (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state?.toLowerCase() === 'active')) && (
+                             <>
+                               <button
+                                 onClick={() => handleVMAction(vm.id, 'stop')}
+                                 disabled={disabled || actionLoading[`stop-${vm.id}`]}
+                                 className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                               >
                                 {actionLoading[`stop-${vm.id}`] ? (
                                   <svg
                                     className="w-4 h-4 animate-spin"
@@ -432,13 +488,24 @@ export const VmList: React.FC = () => {
                             )}
                             Delete
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                         </div>
+                       </td>
+                     </tr>
+                     {expandedVmId === vm.id && (
+                       <tr className="bg-gray-50">
+                         <td colSpan={7} className="px-6 py-4">
+                           <MetadataViewer
+                             metadata={vm.metadata}
+                             name={`Metadata - ${vm.name}`}
+                           />
+                         </td>
+                       </tr>
+                     )}
+                     </React.Fragment>
+                   );
+                 })}
+               </tbody>
+             </table>
           </div>
         </div>
       )}

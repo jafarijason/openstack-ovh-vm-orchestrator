@@ -8,7 +8,7 @@ maps cloud operations to the provider interface.
 from typing import List, Optional
 from datetime import datetime
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, VolumeAttachment
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, VolumeAttachment
 from api.core.exceptions import (
     CloudConnectionError,
     CloudOperationError,
@@ -47,6 +47,39 @@ class OpenStackProvider(BaseProvider):
                     "Check your application_credential_secret, password, or auth tokens."
                 )
             raise CloudConnectionError(cloud_name or "default", error_msg)
+
+    def _object_to_dict(self, obj) -> dict:
+        """Convert OpenStack SDK object to dictionary, preserving all attributes."""
+        if isinstance(obj, dict):
+            return obj
+        if obj is None:
+            return {}
+        
+        result = {}
+        try:
+            # Try to get all attributes from the object
+            if hasattr(obj, '__dict__'):
+                for key, value in obj.__dict__.items():
+                    if not key.startswith('_'):
+                        try:
+                            # Safely serialize the value
+                            if isinstance(value, (str, int, float, bool, type(None))):
+                                result[key] = value
+                            elif isinstance(value, (list, tuple)):
+                                result[key] = list(value)
+                            elif isinstance(value, dict):
+                                result[key] = value
+                            elif hasattr(value, '__dict__'):
+                                # Nested object, recursively convert
+                                result[key] = self._object_to_dict(value)
+                            else:
+                                result[key] = str(value)
+                        except (TypeError, AttributeError):
+                            result[key] = str(value)
+        except Exception:
+            pass
+        
+        return result
 
     async def check_connection(self) -> bool:
         """Check if connected to OpenStack cloud."""
@@ -93,6 +126,10 @@ class OpenStackProvider(BaseProvider):
 
     def _vm_from_os(self, server) -> VM:
         """Convert OpenStack server object to our VM model."""
+        # Preserve user metadata and add full OS object as _raw
+        metadata = dict(server.metadata) if server.metadata else {}
+        metadata["_raw"] = self._object_to_dict(server)
+        
         return VM(
             id=server.id,
             name=server.name,
@@ -102,7 +139,7 @@ class OpenStackProvider(BaseProvider):
             network_ids=list(server.networks.keys()) if server.networks else [],
             key_name=server.key_name,
             security_groups=[sg.get("name", "") for sg in (server.security_groups or [])],
-            metadata=dict(server.metadata) if server.metadata else {},
+            metadata=metadata,
             attached_volumes=[vol.get("id", "") for vol in (server.attached_volumes or [])],
             created_at=server.created_at,
             updated_at=server.updated_at,
@@ -118,6 +155,10 @@ class OpenStackProvider(BaseProvider):
             )
             for att in (volume.attachments or [])
         ]
+        # Preserve user metadata and add full OS object as _raw
+        metadata = dict(volume.metadata) if volume.metadata else {}
+        metadata["_raw"] = self._object_to_dict(volume)
+        
         return Volume(
             id=volume.id,
             name=volume.name,
@@ -126,13 +167,17 @@ class OpenStackProvider(BaseProvider):
             volume_type=volume.volume_type,
             description=volume.description,
             attachments=attachments,
-            metadata=dict(volume.metadata) if volume.metadata else {},
+            metadata=metadata,
             created_at=volume.created_at,
             updated_at=volume.updated_at,
         )
 
     def _snapshot_from_os(self, snapshot) -> Snapshot:
         """Convert OpenStack snapshot object to our Snapshot model."""
+        # Preserve user metadata and add full OS object as _raw
+        metadata = dict(snapshot.metadata) if snapshot.metadata else {}
+        metadata["_raw"] = self._object_to_dict(snapshot)
+        
         return Snapshot(
             id=snapshot.id,
             name=snapshot.name,
@@ -140,7 +185,7 @@ class OpenStackProvider(BaseProvider):
             size_gb=snapshot.size,
             status=self._map_snapshot_status(snapshot.status),
             description=snapshot.description,
-            metadata=dict(snapshot.metadata) if snapshot.metadata else {},
+            metadata=metadata,
             created_at=snapshot.created_at,
             updated_at=snapshot.updated_at,
         )
@@ -224,9 +269,25 @@ class OpenStackProvider(BaseProvider):
             compute = self.engine.get_compute()
             server = await self.get_vm(vm_id)
             
+            # Check if VM can be started
+            can_start = False
             if server.status == VMStatus.STOPPED:
+                can_start = True
+            elif server.status == VMStatus.UNKNOWN:
+                # Try to use vm_state from raw metadata as fallback
+                raw_vm_state = server.metadata.get("_raw", {}).get("vm_state", "").lower()
+                if raw_vm_state == "stopped":
+                    can_start = True
+                elif raw_vm_state not in ("active", ""):
+                    # VM in transitional or error state
+                    raise OperationNotAllowedError("start", f"UNKNOWN (vm_state={raw_vm_state})")
+            
+            if can_start:
                 compute.start_server(vm_id)
-            elif server.status != VMStatus.ACTIVE:
+            elif server.status == VMStatus.ACTIVE:
+                # Already running, just return current state
+                pass
+            else:
                 raise OperationNotAllowedError("start", server.status.value)
             
             # Return updated state
@@ -235,6 +296,10 @@ class OpenStackProvider(BaseProvider):
         except (NotFoundError, OperationNotAllowedError):
             raise
         except Exception as e:
+            error_str = str(e).lower()
+            # Handle 409 Conflict - VM may already be starting or in transitional state
+            if "409" in error_str or "conflict" in error_str:
+                raise ConflictError("VM may already be starting or in transitional state", "VM_CONFLICT")
             raise CloudOperationError("start_vm", str(e))
 
     async def stop_vm(self, vm_id: str) -> VM:
@@ -243,9 +308,25 @@ class OpenStackProvider(BaseProvider):
             compute = self.engine.get_compute()
             server = await self.get_vm(vm_id)
             
+            # Check if VM can be stopped
+            can_stop = False
             if server.status == VMStatus.ACTIVE:
+                can_stop = True
+            elif server.status == VMStatus.UNKNOWN:
+                # Try to use vm_state from raw metadata as fallback
+                raw_vm_state = server.metadata.get("_raw", {}).get("vm_state", "").lower()
+                if raw_vm_state == "active":
+                    can_stop = True
+                elif raw_vm_state not in ("stopped", ""):
+                    # VM in transitional or error state
+                    raise OperationNotAllowedError("stop", f"UNKNOWN (vm_state={raw_vm_state})")
+            
+            if can_stop:
                 compute.stop_server(vm_id)
-            elif server.status != VMStatus.STOPPED:
+            elif server.status == VMStatus.STOPPED:
+                # Already stopped, just return current state
+                pass
+            else:
                 raise OperationNotAllowedError("stop", server.status.value)
             
             # Return updated state
@@ -254,6 +335,10 @@ class OpenStackProvider(BaseProvider):
         except (NotFoundError, OperationNotAllowedError):
             raise
         except Exception as e:
+            error_str = str(e).lower()
+            # Handle 409 Conflict - VM may already be stopping or in transitional state
+            if "409" in error_str or "conflict" in error_str:
+                raise ConflictError("VM may already be stopping or in transitional state", "VM_CONFLICT")
             raise CloudOperationError("stop_vm", str(e))
 
     async def reboot_vm(self, vm_id: str) -> VM:
@@ -262,10 +347,22 @@ class OpenStackProvider(BaseProvider):
             compute = self.engine.get_compute()
             server = await self.get_vm(vm_id)
             
-            if server.status != VMStatus.ACTIVE:
+            # Check if VM can be rebooted (must be active)
+            can_reboot = False
+            if server.status == VMStatus.ACTIVE:
+                can_reboot = True
+            elif server.status == VMStatus.UNKNOWN:
+                # Try to use vm_state from raw metadata as fallback
+                raw_vm_state = server.metadata.get("_raw", {}).get("vm_state", "").lower()
+                if raw_vm_state == "active":
+                    can_reboot = True
+                else:
+                    raise OperationNotAllowedError("reboot", f"UNKNOWN (vm_state={raw_vm_state})")
+            else:
                 raise OperationNotAllowedError("reboot", server.status.value)
             
-            compute.reboot_server(vm_id, reboot_type="SOFT")
+            if can_reboot:
+                compute.reboot_server(vm_id, reboot_type="SOFT")
             
             # Return updated state
             updated = compute.get_server(vm_id)
@@ -273,6 +370,10 @@ class OpenStackProvider(BaseProvider):
         except (NotFoundError, OperationNotAllowedError):
             raise
         except Exception as e:
+            error_str = str(e).lower()
+            # Handle 409 Conflict - VM may already be rebooting or in transitional state
+            if "409" in error_str or "conflict" in error_str:
+                raise ConflictError("VM may already be rebooting or in transitional state", "VM_CONFLICT")
             raise CloudOperationError("reboot_vm", str(e))
 
     # Volume Operations
@@ -439,3 +540,42 @@ class OpenStackProvider(BaseProvider):
             if "not found" in str(e).lower():
                 return False
             raise CloudOperationError("delete_snapshot", str(e))
+
+    # Image Operations
+    async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:
+        """List images from OpenStack."""
+        try:
+            image = self.engine.get_image()
+            # Only use marker if offset is not 0 (OpenStack quirk)
+            if offset > 0:
+                images = list(image.images(limit=limit, marker=offset))
+            else:
+                images = list(image.images(limit=limit))
+            
+            total = len(images) + offset
+            return [self._image_from_os(img) for img in images], total
+        except Exception as e:
+            raise CloudOperationError("list_images", str(e))
+
+    def _image_from_os(self, os_image) -> Image:
+        """Convert OpenStack image to domain model."""
+        # Preserve image properties and add full OS object as _raw
+        metadata = dict(getattr(os_image, 'properties', {})) if hasattr(os_image, 'properties') else {}
+        metadata["_raw"] = self._object_to_dict(os_image)
+        
+        return Image(
+            id=os_image.id,
+            name=os_image.name,
+            status=ImageStatus(os_image.status.upper()) if hasattr(os_image, 'status') else ImageStatus.UNKNOWN,
+            size_bytes=getattr(os_image, 'size', None),
+            disk_format=getattr(os_image, 'disk_format', None),
+            container_format=getattr(os_image, 'container_format', None),
+            is_public=getattr(os_image, 'is_public', False),
+            is_protected=getattr(os_image, 'protected', False),
+            min_disk_gb=getattr(os_image, 'min_disk', None),
+            min_ram_mb=getattr(os_image, 'min_ram', None),
+            description=metadata.get('description'),
+            metadata=metadata,
+            created_at=getattr(os_image, 'created_at', None),
+            updated_at=getattr(os_image, 'updated_at', None),
+        )

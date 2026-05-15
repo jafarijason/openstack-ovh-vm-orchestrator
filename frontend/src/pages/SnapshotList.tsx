@@ -4,6 +4,7 @@ import { volumeService } from "@/services/volumeService"
 import { useCloudStore } from "@/stores/cloudStore"
 import { LoadingSpinner } from "@/components/common/LoadingSpinner"
 import { ErrorAlert } from "@/components/common/ErrorAlert"
+import { MetadataViewer } from "@/components/common/MetadataViewer"
 
 type SnapshotResponse = components["schemas"]["SnapshotResponse"]
 type CreateSnapshotRequest = components["schemas"]["CreateSnapshotRequest"]
@@ -28,6 +29,7 @@ export const SnapshotList: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
+  const [expandedSnapshotId, setExpandedSnapshotId] = useState<string | null>(null)
 
    const loadSnapshots = async (cloud: string) => {
      try {
@@ -358,9 +360,31 @@ export const SnapshotList: React.FC = () => {
                   </div>
                 )}
 
+                {/* Metadata Viewer */}
+                {expandedSnapshotId === snapshot.id && (
+                  <div className="mb-4 pt-4 border-t border-gray-200">
+                    <MetadataViewer
+                      metadata={snapshot.metadata}
+                      name={`Metadata - ${snapshot.name}`}
+                    />
+                  </div>
+                )}
+
                 {/* Actions */}
                 {deleteConfirm !== snapshot.id && (
                   <div className="flex gap-2 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() =>
+                        setExpandedSnapshotId(
+                          expandedSnapshotId === snapshot.id ? null : snapshot.id
+                        )
+                      }
+                      className="flex-1 text-sm px-3 py-2 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-medium"
+                    >
+                      {expandedSnapshotId === snapshot.id
+                        ? "Hide Metadata"
+                        : "View Metadata"}
+                    </button>
                     <button
                       onClick={() => setDeleteConfirm(snapshot.id)}
                       disabled={deletingIds.has(snapshot.id)}
