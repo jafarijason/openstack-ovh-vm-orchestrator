@@ -8,6 +8,30 @@ Get the OpenStack VM Orchestrator running in 5 minutes.
 - Node.js 18+ (for frontend)
 - ~5 minutes and a terminal
 
+## Prerequisites Setup
+
+### Cloud Configuration
+
+Before running the application, you need to set up your cloud configuration:
+
+```bash
+# Copy the example clouds.yaml
+cp clouds.yaml.example clouds.yaml
+```
+
+The `clouds.yaml` file tells the application which cloud provider to use. By default, it's configured to use the **mock provider** (no credentials needed - perfect for development).
+
+**For Production (Real OpenStack/OVH):**
+```bash
+# Edit clouds.yaml with your credentials
+nano clouds.yaml
+
+# Then set the active cloud
+export OS_CLOUD=ovh  # or your cloud name
+```
+
+---
+
 ## Option 1: Local Development (Fastest)
 
 ### 1. Install Dependencies
@@ -24,7 +48,14 @@ npm install
 cd ..
 ```
 
-### 2. Start Backend
+### 2. Prepare Cloud Configuration
+
+```bash
+# Set up clouds.yaml (uses mock provider by default)
+cp clouds.yaml.example clouds.yaml
+```
+
+### 3. Start Backend
 
 ```bash
 python -m uvicorn api.main:app --reload --port 8000
@@ -36,20 +67,20 @@ INFO:     Uvicorn running on http://0.0.0.0:8000
 INFO:     Application startup complete
 ```
 
-### 3. Start Frontend (Optional)
+### 4. Start Frontend (Optional)
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-### 4. Access
+### 5. Access
 
 - **API**: http://localhost:8000
 - **Swagger UI**: http://localhost:8000/docs
 - **Frontend**: http://localhost:5174 (if you ran npm run dev)
 
-### 5. Test It
+### 6. Test It
 
 ```bash
 # List VMs
@@ -73,30 +104,76 @@ curl http://localhost:8000/networks
 
 ---
 
-## Option 2: Docker Compose (Recommended)
+## Option 2: Docker Compose (Recommended) - Easiest Way
 
-### 1. Run Everything
+### The Simplest Way to Run Everything
 
 ```bash
+# 1. Ensure you have clouds.yaml (uses mock provider by default)
+cp clouds.yaml.example clouds.yaml
+
+# 2. Start everything with one command
+docker-compose up -d
+
+# 3. Wait for services to start (about 5 seconds)
+sleep 5
+
+# 4. Access the application
+# API: http://localhost:8000
+# Frontend: http://localhost:5174
+# Swagger UI: http://localhost:8000/docs
+```
+
+That's it! No configuration needed. The mock provider will start automatically.
+
+### Check Everything is Running
+
+```bash
+# View all containers
+docker-compose ps
+
+# View API logs
+docker-compose logs api
+
+# View Frontend logs
+docker-compose logs frontend
+
+# Test the API
+curl http://localhost:8000/health | jq .
+```
+
+### Access the Application
+
+- **🌐 Frontend UI**: http://localhost:5174
+- **📡 API**: http://localhost:8000
+- **📚 API Documentation**: http://localhost:8000/docs
+- **🔧 API Schema**: http://localhost:8000/openapi.json
+
+### Using Real OpenStack Cloud
+
+```bash
+# 1. Update clouds.yaml with your credentials
+nano clouds.yaml
+
+# 2. Set the active cloud
+export OS_CLOUD=ovh
+
+# 3. Rebuild and restart
+docker-compose build
 docker-compose up -d
 ```
 
-### 2. Check Status
+### Stop and Clean Up
 
 ```bash
-docker-compose ps
-docker-compose logs api
-```
+# Stop containers (keep data)
+docker-compose stop
 
-### 3. Access
-
-- **API**: http://localhost:8000
-- **Swagger UI**: http://localhost:8000/docs
-
-### 4. Stop
-
-```bash
+# Stop and remove containers (clean everything)
 docker-compose down
+
+# Stop, remove containers, AND remove volumes
+docker-compose down -v
 ```
 
 ---
@@ -150,7 +227,7 @@ pytest --cov=api tests/unit/test_services.py
 pytest tests/integration/test_vm_endpoints.py -v
 ```
 
-**Current Status**: 23/32 passing unit tests, 49% coverage
+**Current Status**: 32/32 passing unit tests (100%), 49% coverage
 
 ---
 

@@ -95,6 +95,9 @@ source .venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Prepare cloud configuration
+cp clouds.yaml.example clouds.yaml
+
 # Verify installation
 python -c "import uvicorn; import fastapi; print('✅ Setup successful')"
 ```
@@ -102,7 +105,7 @@ python -c "import uvicorn; import fastapi; print('✅ Setup successful')"
 **Run Backend:**
 
 ```bash
-# Development mode (with auto-reload)
+# Development mode (with auto-reload, uses mock provider by default)
 python -m uvicorn api.main:app --reload --port 8000
 
 # Or with specific cloud provider
@@ -139,14 +142,20 @@ Frontend will be available at `http://localhost:5174` (or next available port)
 ### Docker Setup (Optional)
 
 ```bash
-# Build Docker image
-docker build -t openstack-orchestrator .
+# Prepare cloud configuration
+cp clouds.yaml.example clouds.yaml
 
-# Run with docker-compose
+# Build Docker image and run with docker-compose
 docker-compose up -d
 
 # Check if running
-curl http://localhost:8000/health
+curl http://localhost:8000/health | jq .
+
+# View logs
+docker-compose logs -f api
+
+# Stop
+docker-compose down -v
 ```
 
 ---

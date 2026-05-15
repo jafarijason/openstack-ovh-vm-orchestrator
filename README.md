@@ -184,12 +184,37 @@ Build a REST API service for OpenStack VM lifecycle management that demonstrates
 - Docker & Docker Compose (optional)
 - OVH OpenStack account (optional, mock provider included)
 
+### ⚡ Quickest Way to Start (Docker Compose)
+
+```bash
+# Clone repository
+git clone https://github.com/jafarijason/openstack-ovh-vm-orchestrator.git
+cd openstack-ovh-vm-orchestrator
+
+# Prepare cloud configuration (uses mock provider by default)
+cp clouds.yaml.example clouds.yaml
+
+# Start everything
+docker-compose up -d
+
+# Wait for services to start
+sleep 5
+```
+
+That's it! No credentials needed. Access:
+- **Frontend**: http://localhost:5174
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+
 ### Setup - Local Development
 
 ```bash
 # Clone repository
 git clone https://github.com/jafarijason/openstack-ovh-vm-orchestrator.git
 cd openstack-ovh-vm-orchestrator
+
+# Prepare cloud configuration
+cp clouds.yaml.example clouds.yaml
 
 # Backend setup
 python3.11 -m venv .venv
@@ -215,13 +240,30 @@ npm run dev
 - API Docs: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
-### Setup - Docker (Coming Soon)
+### Setup - Docker Compose
 
 ```bash
+# Prepare cloud configuration
+cp clouds.yaml.example clouds.yaml
+
 # Build and run with Docker Compose
 docker-compose up -d
 
-# Access API: http://localhost:8000
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f api
+```
+
+**Access the application:**
+- Frontend: http://localhost:5174
+- API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+**Stop and clean up:**
+```bash
+docker-compose down -v
 ```
 
 ### Test the API
