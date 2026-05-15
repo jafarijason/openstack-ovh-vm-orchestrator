@@ -48,3 +48,4 @@ clouds.yaml
 
 # Project specific
 *.log
+node_modules
