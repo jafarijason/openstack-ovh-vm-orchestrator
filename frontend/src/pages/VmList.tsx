@@ -162,11 +162,11 @@ export const VmList: React.FC = () => {
 
   const getActualVmState = (vm: VMResponse): string => {
     // If status is UNKNOWN, try to use vm_state from raw metadata
-    if (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state) {
-      const rawState = vm.metadata._raw.vm_state.toLowerCase();
+    const rawVmState = (vm.metadata?._raw as any)?.vm_state;
+    if (vm.status === 'UNKNOWN' && rawVmState) {
+      const rawState = rawVmState.toLowerCase();
       // Map OpenStack vm_state values to our status enum
       if (rawState === 'active') return 'ACTIVE';
-      if (rawState === 'stopped') return 'STOPPED';
       if (rawState === 'stopped') return 'STOPPED';
       return vm.status;
     }
@@ -174,9 +174,10 @@ export const VmList: React.FC = () => {
   };
 
   const getDisplayStatus = (vm: VMResponse): { status: string; isRaw: boolean } => {
-    if (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state) {
+    const rawVmState = (vm.metadata?._raw as any)?.vm_state;
+    if (vm.status === 'UNKNOWN' && rawVmState) {
       return {
-        status: `${vm.metadata._raw.vm_state} (raw)`,
+        status: `${rawVmState} (raw)`,
         isRaw: true,
       };
     }
@@ -208,6 +209,65 @@ export const VmList: React.FC = () => {
     const actualState = getActualVmState(vm);
     return actualState === 'BUILDING' || actualState === 'DELETING';
   };
+
+  const getPublicIPs = (vm: VMResponse): string[] => {
+    const ips: string[] = [];
+    const raw = (vm.metadata?._raw as any) || {};
+    if (raw.addresses) {
+      Object.values(raw.addresses).forEach((networks: any) => {
+        if (Array.isArray(networks)) {
+          networks.forEach((addr: any) => {
+            if (addr['OS-EXT-IPS:type'] === 'floating' || addr.version === 4) {
+              if (addr.addr && !ips.includes(addr.addr)) {
+                ips.push(addr.addr);
+              }
+            }
+          });
+        }
+      });
+    }
+    return ips.filter((ip) => ip && !ip.startsWith('10.'));
+  };
+
+  const getPrivateIPs = (vm: VMResponse): string[] => {
+    const ips: string[] = [];
+    const raw = (vm.metadata?._raw as any) || {};
+    if (raw.addresses) {
+      Object.values(raw.addresses).forEach((networks: any) => {
+        if (Array.isArray(networks)) {
+          networks.forEach((addr: any) => {
+            if (addr['OS-EXT-IPS:type'] === 'fixed' || addr.version === 4) {
+              if (addr.addr && addr.addr.startsWith('10.')) {
+                if (!ips.includes(addr.addr)) {
+                  ips.push(addr.addr);
+                }
+              }
+            }
+          });
+        }
+      });
+    }
+    return ips;
+  };
+
+   const getVolumeIds = (vm: VMResponse): string[] => {
+     const raw = (vm.metadata?._raw as any) || {};
+     if (raw['os-extended-volumes:volumes_attached']) {
+       return (raw['os-extended-volumes:volumes_attached'] as any[]).map(
+         (vol) => vol.id
+       );
+     }
+     return [];
+   };
+
+   const getLocation = (vm: VMResponse): string => {
+     const raw = (vm.metadata?._raw as any) || {};
+     // Try to extract location from availability_zone (e.g., "BHS5")
+     if (raw['OS-EXT-AZ:availability_zone']) {
+       return raw['OS-EXT-AZ:availability_zone'];
+     }
+     return 'Unknown';
+   };
 
   return (
     <div className="space-y-6">
@@ -315,11 +375,11 @@ export const VmList: React.FC = () => {
                        <td className="px-6 py-4 whitespace-nowrap">
                          <div>
                            <span className={getStatusBadge(displayStatus.status)}>{displayStatus.status}</span>
-                           {displayStatus.isRaw && vm.metadata?._raw?.vm_state && (
-                             <p className="text-xs text-gray-500 mt-1">
-                               from _raw.vm_state
-                             </p>
-                           )}
+                           {displayStatus.isRaw && (vm.metadata?._raw as any)?.vm_state && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                from _raw.vm_state
+                              </p>
+                            )}
                          </div>
                        </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -334,7 +394,7 @@ export const VmList: React.FC = () => {
                        <td className="px-6 py-4 whitespace-nowrap">
                          <div className="flex items-center gap-2">
                            {(vm.status === 'STOPPED' || 
-                             (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state?.toLowerCase() === 'stopped')) && (
+                              (vm.status === 'UNKNOWN' && (vm.metadata?._raw as any)?.vm_state?.toLowerCase() === 'stopped')) && (
                              <button
                                onClick={() => handleVMAction(vm.id, 'start')}
                                disabled={disabled || actionLoading[`start-${vm.id}`]}
@@ -373,8 +433,8 @@ export const VmList: React.FC = () => {
                             </button>
                           )}
 
-                           {(vm.status === 'ACTIVE' ||
-                             (vm.status === 'UNKNOWN' && vm.metadata?._raw?.vm_state?.toLowerCase() === 'active')) && (
+                            {(vm.status === 'ACTIVE' ||
+                              (vm.status === 'UNKNOWN' && (vm.metadata?._raw as any)?.vm_state?.toLowerCase() === 'active')) && (
                              <>
                                <button
                                  onClick={() => handleVMAction(vm.id, 'stop')}
@@ -491,17 +551,103 @@ export const VmList: React.FC = () => {
                          </div>
                        </td>
                      </tr>
-                     {expandedVmId === vm.id && (
-                       <tr className="bg-gray-50">
-                         <td colSpan={7} className="px-6 py-4">
-                           <MetadataViewer
-                             metadata={vm.metadata}
-                             name={`Metadata - ${vm.name}`}
-                           />
-                         </td>
-                       </tr>
-                     )}
-                     </React.Fragment>
+                       {expandedVmId === vm.id && (
+                         <>
+                           <tr className="bg-gray-100 border-b border-gray-200">
+                             <td colSpan={7} className="px-6 py-4">
+                               <div className="grid grid-cols-2 gap-8">
+                                 {/* Name/ID */}
+                                 <div>
+                                   <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                     Name/ID
+                                   </h4>
+                                   <p className="text-sm font-medium text-gray-900">{vm.name}</p>
+                                   <p className="text-xs text-gray-600 font-mono break-all">{vm.id}</p>
+                                 </div>
+                                 {/* Location */}
+                                 <div>
+                                   <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                     Location
+                                   </h4>
+                                   <p className="text-sm font-medium text-gray-900">{getLocation(vm)}</p>
+                                 </div>
+                               </div>
+                             </td>
+                           </tr>
+                           <tr className="bg-blue-50 border-b border-gray-200">
+                             <td colSpan={7} className="px-6 py-4">
+                               <div className="grid grid-cols-3 gap-6">
+                                {/* Public IPs */}
+                                <div>
+                                  <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                    Public IPs
+                                  </h4>
+                                  <div className="space-y-1">
+                                    {getPublicIPs(vm).length > 0 ? (
+                                      getPublicIPs(vm).map((ip) => (
+                                        <p key={ip} className="text-sm font-mono text-gray-900">
+                                          {ip}
+                                        </p>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-gray-500 italic">None</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Private IPs */}
+                                <div>
+                                  <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                    Private IPs
+                                  </h4>
+                                  <div className="space-y-1">
+                                    {getPrivateIPs(vm).length > 0 ? (
+                                      getPrivateIPs(vm).map((ip) => (
+                                        <p key={ip} className="text-sm font-mono text-gray-900">
+                                          {ip}
+                                        </p>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-gray-500 italic">None</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Volumes */}
+                                <div>
+                                  <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                                    Volumes
+                                  </h4>
+                                  <div className="space-y-1">
+                                    {getVolumeIds(vm).length > 0 ? (
+                                      getVolumeIds(vm).map((volId) => (
+                                        <p
+                                          key={volId}
+                                          className="text-sm font-mono text-gray-900 truncate"
+                                          title={volId}
+                                        >
+                                          {volId.substring(0, 20)}...
+                                        </p>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-gray-500 italic">None</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr className="bg-gray-50">
+                            <td colSpan={7} className="px-6 py-4">
+                              <MetadataViewer
+                                metadata={vm.metadata}
+                                name={`Metadata - ${vm.name}`}
+                              />
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                      </React.Fragment>
                    );
                  })}
                </tbody>

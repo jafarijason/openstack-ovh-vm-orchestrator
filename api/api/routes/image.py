@@ -2,7 +2,7 @@
 
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, Query
-from api.api.schemas.common import SuccessResponse, PaginationMeta
+from api.api.schemas.common import ListResponse, PaginationMeta
 from api.api.schemas.image import ImageResponse
 from api.services.image_service import ImageService
 from api.providers.factory import create_provider
@@ -59,7 +59,7 @@ def image_to_response(image) -> ImageResponse:
     )
 
 
-@router.get("", response_model=dict)
+@router.get("", response_model=ListResponse[ImageResponse])
 async def list_images(
     request: Request,
     cloud: Optional[str] = Query(None),
@@ -84,17 +84,15 @@ async def list_images(
         service = get_image_service(request, cloud)
         images, total = await service.list_images(limit=limit, offset=offset)
         
-        return {
-            "success": True,
-            "data": [image_to_response(img) for img in images],
-            "pagination": PaginationMeta(
+        return ListResponse(
+            data=[image_to_response(img) for img in images],
+            pagination=PaginationMeta(
                 total=total,
                 page=(offset // limit) + 1 if limit > 0 else 1,
                 per_page=limit,
                 pages=(total + limit - 1) // limit if limit > 0 else 0,
-            ).model_dump(),
-            "message": f"Found {len(images)} images",
-        }
+            ),
+        )
     except CloudOperationError as e:
         raise HTTPException(status_code=502, detail={"code": e.code, "message": e.message})
     except Exception as e:

@@ -325,6 +325,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Images
+         * @description List available images with pagination.
+         *
+         *     Args:
+         *         request: FastAPI request
+         *         cloud: Cloud name (query parameter)
+         *         limit: Maximum number of results (default: 100, max: 1000)
+         *         offset: Number of results to skip (default: 0)
+         *
+         *     Returns:
+         *         List of images with pagination info
+         *
+         *     Example:
+         *         GET /images?cloud=ovh&limit=50&offset=0
+         */
+        get: operations["list_images_images_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clouds": {
         parameters: {
             query?: never;
@@ -386,6 +418,35 @@ export interface paths {
          *         dict: Welcome message
          */
         get: operations["hello_world__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health/cloud/{cloud_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cloud Health Check
+         * @description Check if a specific cloud can be connected to.
+         *
+         *     This endpoint tests the actual connection to a cloud provider
+         *     to ensure credentials are valid and the service is reachable.
+         *
+         *     Args:
+         *         cloud_name: Name of the cloud to check (e.g., 'ovh', 'mock')
+         *
+         *     Returns:
+         *         dict: Cloud health status with connection details
+         */
+        get: operations["cloud_health_check_health_cloud__cloud_name__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -558,6 +619,151 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * ImageResponse
+         * @description Image response model.
+         * @example {
+         *       "container_format": "bare",
+         *       "created_at": "2025-05-15T10:30:00Z",
+         *       "description": "Ubuntu 20.04 LTS base image",
+         *       "disk_format": "qcow2",
+         *       "id": "img-ubuntu-20-04",
+         *       "is_protected": false,
+         *       "is_public": true,
+         *       "metadata": {
+         *         "_raw": {
+         *           "id": "img-ubuntu-20-04",
+         *           "name": "Ubuntu 20.04 LTS",
+         *           "properties": {},
+         *           "status": "ACTIVE"
+         *         }
+         *       },
+         *       "min_disk_gb": 5,
+         *       "min_ram_mb": 512,
+         *       "name": "Ubuntu 20.04 LTS",
+         *       "size_bytes": 2147483648,
+         *       "status": "ACTIVE",
+         *       "updated_at": "2025-05-15T10:30:00Z"
+         *     }
+         */
+        ImageResponse: {
+            /**
+             * Id
+             * @description Unique image identifier
+             */
+            id: string;
+            /**
+             * Name
+             * @description Image name
+             */
+            name: string;
+            /**
+             * Status
+             * @description Image status (ACTIVE, QUEUED, SAVING, etc.)
+             */
+            status: string;
+            /**
+             * Size Bytes
+             * @description Image size in bytes
+             */
+            size_bytes?: number | null;
+            /**
+             * Disk Format
+             * @description Disk format (qcow2, raw, vmdk, etc.)
+             */
+            disk_format?: string | null;
+            /**
+             * Container Format
+             * @description Container format (bare, ovf, etc.)
+             */
+            container_format?: string | null;
+            /**
+             * Is Public
+             * @description Whether image is public
+             * @default false
+             */
+            is_public: boolean;
+            /**
+             * Is Protected
+             * @description Whether image is protected from deletion
+             * @default false
+             */
+            is_protected: boolean;
+            /**
+             * Min Disk Gb
+             * @description Minimum disk size required in GB
+             */
+            min_disk_gb?: number | null;
+            /**
+             * Min Ram Mb
+             * @description Minimum RAM required in MB
+             */
+            min_ram_mb?: number | null;
+            /**
+             * Description
+             * @description Image description
+             */
+            description?: string | null;
+            /**
+             * Metadata
+             * @description Image metadata including _raw OpenStack object
+             */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * @description Image creation timestamp
+             */
+            created_at?: string | null;
+            /**
+             * Updated At
+             * @description Last update timestamp
+             */
+            updated_at?: string | null;
+        };
+        /** ListResponse[ImageResponse] */
+        ListResponse_ImageResponse_: {
+            /**
+             * Success
+             * @description Operation succeeded
+             * @default true
+             */
+            success: boolean;
+            /**
+             * Data
+             * @description List of items
+             */
+            data: components["schemas"]["ImageResponse"][];
+            /** @description Pagination metadata */
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        /**
+         * PaginationMeta
+         * @description Pagination metadata.
+         */
+        PaginationMeta: {
+            /**
+             * Total
+             * @description Total number of items
+             */
+            total: number;
+            /**
+             * Page
+             * @description Current page number
+             */
+            page: number;
+            /**
+             * Per Page
+             * @description Items per page
+             */
+            per_page: number;
+            /**
+             * Pages
+             * @description Total number of pages
+             */
+            pages: number;
         };
         /**
          * SnapshotResponse
@@ -827,6 +1033,10 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
         /**
          * VolumeAttachmentResponse
@@ -941,6 +1151,7 @@ export interface operations {
             query?: {
                 limit?: number;
                 offset?: number;
+                cloud?: string | null;
             };
             header?: never;
             path?: never;
@@ -972,7 +1183,9 @@ export interface operations {
     };
     create_vm_vms_post: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1005,7 +1218,9 @@ export interface operations {
     };
     get_vm_vms__vm_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 vm_id: string;
@@ -1036,7 +1251,9 @@ export interface operations {
     };
     delete_vm_vms__vm_id__delete: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 vm_id: string;
@@ -1065,7 +1282,9 @@ export interface operations {
     };
     perform_vm_action_vms__vm_id__action_post: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 vm_id: string;
@@ -1103,6 +1322,7 @@ export interface operations {
             query?: {
                 limit?: number;
                 offset?: number;
+                cloud?: string | null;
             };
             header?: never;
             path?: never;
@@ -1134,7 +1354,9 @@ export interface operations {
     };
     create_volume_volumes_post: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1167,7 +1389,9 @@ export interface operations {
     };
     get_volume_volumes__volume_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 volume_id: string;
@@ -1198,7 +1422,9 @@ export interface operations {
     };
     delete_volume_volumes__volume_id__delete: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 volume_id: string;
@@ -1227,7 +1453,9 @@ export interface operations {
     };
     attach_volume_volumes__volume_id__attach_post: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 volume_id: string;
@@ -1262,7 +1490,9 @@ export interface operations {
     };
     detach_volume_volumes__volume_id__detach_post: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 volume_id: string;
@@ -1296,6 +1526,7 @@ export interface operations {
             query?: {
                 limit?: number;
                 offset?: number;
+                cloud?: string | null;
             };
             header?: never;
             path?: never;
@@ -1327,7 +1558,9 @@ export interface operations {
     };
     create_snapshot_snapshots_post: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1360,7 +1593,9 @@ export interface operations {
     };
     get_snapshot_snapshots__snapshot_id__get: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 snapshot_id: string;
@@ -1391,7 +1626,9 @@ export interface operations {
     };
     delete_snapshot_snapshots__snapshot_id__delete: {
         parameters: {
-            query?: never;
+            query?: {
+                cloud?: string | null;
+            };
             header?: never;
             path: {
                 snapshot_id: string;
@@ -1406,6 +1643,39 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_images_images_get: {
+        parameters: {
+            query?: {
+                cloud?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListResponse_ImageResponse_"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -1474,6 +1744,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+        };
+    };
+    cloud_health_check_health_cloud__cloud_name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cloud_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
