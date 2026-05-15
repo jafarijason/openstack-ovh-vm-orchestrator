@@ -18,7 +18,7 @@ from app.core.exceptions import (
 )
 
 try:
-    from engine import OpenStackEngine
+    from app.engine import OpenStackEngine
 except ImportError:
     raise ImportError("OpenStackEngine not available. Install openstacksdk and configure clouds.yaml")
 
