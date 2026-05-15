@@ -1,0 +1,179 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Title -->
+  <text x="600" y="30" font-size="28" font-weight="bold" text-anchor="middle" fill="#333">
+    OpenStack VM Orchestrator - Layered Architecture
+  </text>
+
+  <!-- Client Layer -->
+  <g id="client-layer">
+    <rect x="100" y="80" width="250" height="100" fill="#E8F4F8" stroke="#2196F3" stroke-width="2" rx="5"/>
+    <text x="225" y="110" font-size="16" font-weight="bold" text-anchor="middle" fill="#1976D2">
+      Web Browser
+    </text>
+    <text x="225" y="135" font-size="12" text-anchor="middle" fill="#555">
+      React + TypeScript
+    </text>
+    <text x="225" y="155" font-size="12" text-anchor="middle" fill="#555">
+      Frontend UI
+    </text>
+
+    <rect x="450" y="80" width="250" height="100" fill="#E8F4F8" stroke="#2196F3" stroke-width="2" rx="5"/>
+    <text x="575" y="110" font-size="16" font-weight="bold" text-anchor="middle" fill="#1976D2">
+      REST Client
+    </text>
+    <text x="575" y="135" font-size="12" text-anchor="middle" fill="#555">
+      cURL / Postman
+    </text>
+    <text x="575" y="155" font-size="12" text-anchor="middle" fill="#555">
+      Mobile App
+    </text>
+
+    <rect x="800" y="80" width="250" height="100" fill="#E8F4F8" stroke="#2196F3" stroke-width="2" rx="5"/>
+    <text x="925" y="110" font-size="16" font-weight="bold" text-anchor="middle" fill="#1976D2">
+      CI/CD Pipeline
+    </text>
+    <text x="925" y="135" font-size="12" text-anchor="middle" fill="#555">
+      GitHub Actions
+    </text>
+    <text x="925" y="155" font-size="12" text-anchor="middle" fill="#555">
+      Automation
+    </text>
+  </g>
+
+  <!-- Arrows down -->
+  <line x1="225" y1="180" x2="225" y2="220" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="575" y1="180" x2="575" y2="220" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="925" y1="180" x2="575" y2="220" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- API Layer -->
+  <rect x="250" y="220" width="650" height="120" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="575" y="245" font-size="16" font-weight="bold" text-anchor="middle" fill="#E65100">
+    FastAPI Application
+  </text>
+  <text x="575" y="270" font-size="12" text-anchor="middle" fill="#555">
+    OpenAPI 3.1.0 Schema • Swagger UI • ReDoc
+  </text>
+
+  <!-- API Routes -->
+  <g id="routes">
+    <rect x="260" y="285" width="80" height="40" fill="#FFE0B2" stroke="#FF9800" stroke-width="1" rx="3"/>
+    <text x="300" y="310" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">GET /vms</text>
+
+    <rect x="360" y="285" width="80" height="40" fill="#FFE0B2" stroke="#FF9800" stroke-width="1" rx="3"/>
+    <text x="400" y="310" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">POST /vms</text>
+
+    <rect x="460" y="285" width="100" height="40" fill="#FFE0B2" stroke="#FF9800" stroke-width="1" rx="3"/>
+    <text x="510" y="310" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">GET /networks</text>
+
+    <rect x="580" y="285" width="80" height="40" fill="#FFE0B2" stroke="#FF9800" stroke-width="1" rx="3"/>
+    <text x="620" y="310" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">DELETE /vms</text>
+
+    <rect x="680" y="285" width="100" height="40" fill="#FFE0B2" stroke="#FF9800" stroke-width="1" rx="3"/>
+    <text x="730" y="310" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">POST /action</text>
+  </g>
+
+  <!-- Arrows down -->
+  <line x1="575" y1="340" x2="575" y2="380" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- Service Layer -->
+  <rect x="250" y="380" width="650" height="120" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="575" y="405" font-size="16" font-weight="bold" text-anchor="middle" fill="#2E7D32">
+    Service Layer (Business Logic)
+  </text>
+  <text x="575" y="430" font-size="12" text-anchor="middle" fill="#555">
+    Orchestration • Validation • State Management
+  </text>
+
+  <!-- Services -->
+  <g id="services">
+    <rect x="260" y="445" width="90" height="40" fill="#C8E6C9" stroke="#4CAF50" stroke-width="1" rx="3"/>
+    <text x="305" y="470" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">VMService</text>
+
+    <rect x="370" y="445" width="100" height="40" fill="#C8E6C9" stroke="#4CAF50" stroke-width="1" rx="3"/>
+    <text x="420" y="470" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">NetworkService</text>
+
+    <rect x="490" y="445" width="90" height="40" fill="#C8E6C9" stroke="#4CAF50" stroke-width="1" rx="3"/>
+    <text x="535" y="470" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">ImageService</text>
+
+    <rect x="600" y="445" width="100" height="40" fill="#C8E6C9" stroke="#4CAF50" stroke-width="1" rx="3"/>
+    <text x="650" y="470" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">FlavorService</text>
+
+    <rect x="720" y="445" width="110" height="40" fill="#C8E6C9" stroke="#4CAF50" stroke-width="1" rx="3"/>
+    <text x="775" y="470" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">SSHKeyService</text>
+  </g>
+
+  <!-- Arrows down -->
+  <line x1="575" y1="500" x2="575" y2="540" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- Provider Abstraction Layer -->
+  <rect x="250" y="540" width="650" height="100" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="5"/>
+  <text x="575" y="565" font-size="16" font-weight="bold" text-anchor="middle" fill="#6A1B9A">
+    Provider Abstraction Layer
+  </text>
+  <text x="575" y="590" font-size="12" text-anchor="middle" fill="#555">
+    Abstract Interface • Factory Pattern • Dependency Injection
+  </text>
+
+  <!-- Providers -->
+  <g id="providers">
+    <rect x="300" y="605" width="150" height="40" fill="#E1BEE7" stroke="#9C27B0" stroke-width="1" rx="3"/>
+    <text x="375" y="630" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">MockProvider</text>
+
+    <rect x="550" y="605" width="150" height="40" fill="#E1BEE7" stroke="#9C27B0" stroke-width="1" rx="3"/>
+    <text x="625" y="630" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">OpenStackProvider</text>
+
+    <rect x="800" y="605" width="150" height="40" fill="#E1BEE7" stroke="#9C27B0" stroke-width="1" rx="3"/>
+    <text x="875" y="630" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">Future Providers</text>
+  </g>
+
+  <!-- Arrows down -->
+  <line x1="375" y1="645" x2="300" y2="680" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="575" y1="645" x2="575" y2="680" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="875" y1="645" x2="850" y2="680" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- Infrastructure Layer -->
+  <g id="infrastructure">
+    <rect x="100" y="680" width="300" height="80" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+    <text x="250" y="705" font-size="14" font-weight="bold" text-anchor="middle" fill="#C62828">
+      Local Development
+    </text>
+    <text x="250" y="725" font-size="11" text-anchor="middle" fill="#555">
+      In-Memory Storage
+    </text>
+    <text x="250" y="740" font-size="11" text-anchor="middle" fill="#555">
+      Mock Data
+    </text>
+
+    <rect x="450" y="680" width="300" height="80" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+    <text x="600" y="705" font-size="14" font-weight="bold" text-anchor="middle" fill="#C62828">
+      OVH OpenStack
+    </text>
+    <text x="600" y="725" font-size="11" text-anchor="middle" fill="#555">
+      Real Cloud Infrastructure
+    </text>
+    <text x="600" y="740" font-size="11" text-anchor="middle" fill="#555">
+      Production Ready
+    </text>
+
+    <rect x="800" y="680" width="300" height="80" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+    <text x="950" y="705" font-size="14" font-weight="bold" text-anchor="middle" fill="#C62828">
+      Future Clouds
+    </text>
+    <text x="950" y="725" font-size="11" text-anchor="middle" fill="#555">
+      AWS, Azure, GCP
+    </text>
+    <text x="950" y="740" font-size="11" text-anchor="middle" fill="#555">
+      Easily Extensible
+    </text>
+  </g>
+
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+      <polygon points="0 0, 10 5, 0 10" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- Legend -->
+  <text x="50" y="770" font-size="11" fill="#666">Data Flow ↓ | Multi-cloud Support ✓ | Type Safe ✓ | Async/Await ✓</text>
+</svg>

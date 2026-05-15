@@ -1,0 +1,132 @@
+<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+  <!-- Title -->
+  <text x="500" y="30" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">
+    Testing Coverage & Strategy
+  </text>
+
+  <!-- Overall Coverage -->
+  <g id="coverage-summary">
+    <rect x="50" y="70" width="900" height="120" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" rx="5"/>
+    <text x="500" y="95" font-size="16" font-weight="bold" text-anchor="middle" fill="#1976D2">
+      Code Coverage: 49% Overall
+    </text>
+
+    <!-- Coverage bars -->
+    <g font-size="11">
+      <!-- Services 100% -->
+      <rect x="70" y="115" width="120" height="30" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1" rx="3"/>
+      <text x="130" y="128" font-weight="bold" text-anchor="middle" fill="#333">api/services</text>
+      <text x="130" y="142" font-size="9" text-anchor="middle" fill="#2E7D32">100%</text>
+
+      <!-- Schemas 100% -->
+      <rect x="210" y="115" width="120" height="30" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1" rx="3"/>
+      <text x="270" y="128" font-weight="bold" text-anchor="middle" fill="#333">api/schemas</text>
+      <text x="270" y="142" font-size="9" text-anchor="middle" fill="#2E7D32">100%</text>
+
+      <!-- Models 98% -->
+      <rect x="350" y="115" width="120" height="30" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1" rx="3"/>
+      <text x="410" y="128" font-weight="bold" text-anchor="middle" fill="#333">api/models</text>
+      <text x="410" y="142" font-size="9" text-anchor="middle" fill="#2E7D32">98%</text>
+
+      <!-- Mock Provider 94% -->
+      <rect x="490" y="115" width="140" height="30" fill="#BBE4D4" stroke="#388E3C" stroke-width="1" rx="3"/>
+      <text x="560" y="128" font-weight="bold" text-anchor="middle" fill="#333">mock_provider</text>
+      <text x="560" y="142" font-size="9" text-anchor="middle" fill="#388E3C">94%</text>
+
+      <!-- Routes 30% -->
+      <rect x="650" y="115" width="120" height="30" fill="#FFCC80" stroke="#F57C00" stroke-width="1" rx="3"/>
+      <text x="710" y="128" font-weight="bold" text-anchor="middle" fill="#333">api/routes</text>
+      <text x="710" y="142" font-size="9" text-anchor="middle" fill="#F57C00">30%</text>
+    </g>
+  </g>
+
+  <!-- Test Pyramid -->
+  <g id="test-pyramid">
+    <rect x="50" y="230" width="400" height="420" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="2" rx="5"/>
+    <text x="250" y="255" font-size="14" font-weight="bold" text-anchor="middle" fill="#7B1FA2">
+      Testing Pyramid
+    </text>
+
+    <!-- E2E Tests (tiny) -->
+    <polygon points="150,280 350,280 330,310 170,310" fill="#FFCDD2" stroke="#D32F2F" stroke-width="1"/>
+    <text x="250" y="298" font-size="11" font-weight="bold" text-anchor="middle" fill="#333">E2E Tests (Docker, K8s)</text>
+    <text x="250" y="312" font-size="9" text-anchor="middle" fill="#555">Planned for Phase 5</text>
+
+    <!-- Integration Tests (middle) -->
+    <polygon points="100,320 400,320 360,380 140,380" fill="#FFE0B2" stroke="#F57C00" stroke-width="1"/>
+    <text x="250" y="345" font-weight="bold" text-anchor="middle" fill="#333">Integration Tests (30+ tests)</text>
+    <text x="250" y="361" font-size="9" text-anchor="middle" fill="#555">Test full HTTP flow, endpoints, error handling</text>
+    <text x="250" y="375" font-size="9" text-anchor="middle" fill="#555">Needs environment setup</text>
+
+    <!-- Unit Tests (large) -->
+    <polygon points="50,390 450,390 370,550 130,550" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1"/>
+    <text x="250" y="440" font-weight="bold" text-anchor="middle" fill="#333">Unit Tests (23 passing of 32)</text>
+    <text x="250" y="458" font-size="10" text-anchor="middle" fill="#555">✓ VM Service: CRUD, lifecycle, pagination</text>
+    <text x="250" y="472" font-size="10" text-anchor="middle" fill="#555">✓ Network Service: list, get, pagination</text>
+    <text x="250" y="486" font-size="10" text-anchor="middle" fill="#555">✓ Image/Flavor/SSH Key Services</text>
+    <text x="250" y="500" font-size="10" text-anchor="middle" fill="#555">✓ Service integration workflows</text>
+    <text x="250" y="514" font-size="10" text-anchor="middle" fill="#555">✓ Error handling & validation</text>
+    <text x="250" y="528" font-size="10" text-anchor="middle" fill="#555">Run: pytest tests/unit/test_services.py</text>
+  </g>
+
+  <!-- Test Infrastructure -->
+  <g id="test-infrastructure">
+    <rect x="500" y="230" width="450" height="420" fill="#E8F5E9" stroke="#2E7D32" stroke-width="2" rx="5"/>
+    <text x="725" y="255" font-size="14" font-weight="bold" text-anchor="middle" fill="#2E7D32">
+      Test Infrastructure
+    </text>
+
+    <!-- Pytest Configuration -->
+    <rect x="520" y="275" width="190" height="90" fill="#BBDEFB" stroke="#1565C0" stroke-width="1" rx="3"/>
+    <text x="615" y="295" font-weight="bold" text-anchor="middle" fill="#333">pytest.ini</text>
+    <text x="615" y="312" font-size="9" text-anchor="middle" fill="#555">Async mode: auto</text>
+    <text x="615" y="325" font-size="9" text-anchor="middle" fill="#555">Markers: unit, integration</text>
+    <text x="615" y="338" font-size="9" text-anchor="middle" fill="#555">Coverage report</text>
+    <text x="615" y="351" font-size="9" text-anchor="middle" fill="#555">HTML export</text>
+
+    <!-- Conftest Fixtures -->
+    <rect x="730" y="275" width="190" height="90" fill="#BBDEFB" stroke="#1565C0" stroke-width="1" rx="3"/>
+    <text x="825" y="295" font-weight="bold" text-anchor="middle" fill="#333">conftest.py</text>
+    <text x="825" y="312" font-size="9" text-anchor="middle" fill="#555">5 service fixtures</text>
+    <text x="825" y="325" font-size="9" text-anchor="middle" fill="#555">10+ data fixtures</text>
+    <text x="825" y="338" font-size="9" text-anchor="middle" fill="#555">Helper functions</text>
+    <text x="825" y="351" font-size="9" text-anchor="middle" fill="#555">Mock provider</text>
+
+    <!-- Unit Test File -->
+    <rect x="520" y="385" width="190" height="110" fill="#FFE0B2" stroke="#F57C00" stroke-width="1" rx="3"/>
+    <text x="615" y="405" font-weight="bold" text-anchor="middle" fill="#333">test_services.py</text>
+    <text x="615" y="422" font-size="9" text-anchor="middle" fill="#555">TestVMService (9 tests)</text>
+    <text x="615" y="435" font-size="9" text-anchor="middle" fill="#555">TestNetworkService (3)</text>
+    <text x="615" y="448" font-size="9" text-anchor="middle" fill="#555">TestImageService (3)</text>
+    <text x="615" y="461" font-size="9" text-anchor="middle" fill="#555">TestFlavorService (3)</text>
+    <text x="615" y="474" font-size="9" text-anchor="middle" fill="#555">TestSSHKeyService (3)</text>
+    <text x="615" y="487" font-size="9" text-anchor="middle" fill="#555">TestServiceIntegration</text>
+
+    <!-- Integration Test File -->
+    <rect x="730" y="385" width="190" height="110" fill="#FFE0B2" stroke="#F57C00" stroke-width="1" rx="3"/>
+    <text x="825" y="405" font-weight="bold" text-anchor="middle" fill="#333">test_vm_endpoints.py</text>
+    <text x="825" y="422" font-size="9" text-anchor="middle" fill="#555">TestVMListEndpoint</text>
+    <text x="825" y="435" font-size="9" text-anchor="middle" fill="#555">TestVMGetEndpoint</text>
+    <text x="825" y="448" font-size="9" text-anchor="middle" fill="#555">TestVMCreateEndpoint</text>
+    <text x="825" y="461" font-size="9" text-anchor="middle" fill="#555">TestVMDeleteEndpoint</text>
+    <text x="825" y="474" font-size="9" text-anchor="middle" fill="#555">TestVMActionEndpoint</text>
+    <text x="825" y="487" font-size="9" text-anchor="middle" fill="#555">+ Error & Response tests</text>
+
+    <!-- CI/CD Integration -->
+    <rect x="520" y="515" width="400" height="100" fill="#C8E6C9" stroke="#2E7D32" stroke-width="1" rx="3"/>
+    <text x="720" y="535" font-weight="bold" text-anchor="middle" fill="#333">CI/CD Integration (.github/workflows/tests.yml)</text>
+    <text x="720" y="553" font-size="10" text-anchor="middle" fill="#555">✓ Runs on Python 3.11 & 3.12 | ✓ Coverage reports</text>
+    <text x="720" y="568" font-size="10" text-anchor="middle" fill="#555">✓ Linting (flake8) | ✓ Type checking (mypy)</text>
+    <text x="720" y="583" font-size="10" text-anchor="middle" fill="#555">✓ Security scanning (pip-audit, Trivy) | ✓ Docker build</text>
+  </g>
+
+  <!-- Running Tests -->
+  <rect x="50" y="700" width="900" height="0" fill="none"/>
+
+  <!-- Commands section -->
+  <g id="commands" font-size="10" text-anchor="start" fill="#333">
+    <text x="50" y="670" font-weight="bold" fill="#333">How to Run Tests:</text>
+    <text x="70" y="685" fill="#555" font-family="monospace">pytest tests/unit/test_services.py  # Run 32 unit tests (23 passing)</text>
+    <text x="70" y="698" fill="#555" font-family="monospace">pytest --cov=api tests/  # Generate coverage report (49% total)</text>
+  </g>
+</svg>

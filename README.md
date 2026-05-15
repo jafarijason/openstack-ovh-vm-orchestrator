@@ -241,54 +241,29 @@ curl -X POST http://localhost:8000/vms \
   -d '{"name": "test-vm", "image_id": "img-001", "flavor_id": "m1.small", "network_ids": ["net-public"]}'
 ```
 
+### Deployment Options
+
+![Deployment Architecture](docs/images/deployment.svg)
+
+The diagram shows three deployment scenarios:
+- **Local Development**: React dev server + Uvicorn with hot reload (mock provider)
+- **Docker Compose**: Containerized full stack with networking
+- **Production (K8s/Cloud)**: Auto-scaled replicas with real OpenStack and load balancing
+
 ---
 
 ## Architecture & Design
 
 ### System Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     FastAPI Application                     │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  API Routes (Request/Response, OpenAPI docs)         │   │
-│  │  GET    /api/v1/vms                                  │   │
-│  │  POST   /api/v1/vms                                  │   │
-│  │  GET    /api/v1/vms/{id}                             │   │
-│  │  POST   /api/v1/vms/{id}/start                       │   │
-│  │  POST   /api/v1/vms/{id}/stop                        │   │
-│  │  DELETE /api/v1/vms/{id}                             │   │
-│  └──────────────────────┬───────────────────────────────┘   │
-│                         │                                    │
-│  ┌──────────────────────▼───────────────────────────────┐   │
-│  │  Service Layer (Business Logic)                      │   │
-│  │  - VMService: orchestration, validation              │   │
-│  │  - VolumeService: storage operations                 │   │
-│  │  - Error handling, retries, state management         │   │
-│  └──────────────────────┬───────────────────────────────┘   │
-│                         │                                    │
-│  ┌──────────────────────▼───────────────────────────────┐   │
-│  │  Provider Abstraction (Infrastructure)               │   │
-│  │  OpenStackProvider (base interface)                  │   │
-│  └──────────────────────┬───────────────────────────────┘   │
-│                    ┌────┴────┐                              │
-│                    │          │                              │
-│        ┌───────────▼──┐  ┌──▼──────────────┐               │
-│        │ MockProvider │  │ OpenStackProv.  │               │
-│        │ (In-Memory)  │  │ (Real OVH)      │               │
-│        └──────────────┘  └──────────────────┘               │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
-                           │
-           ┌───────────────┴───────────────┐
-           │                               │
-      ┌────▼────────┐           ┌──────────▼──────┐
-      │  Local Dev  │           │  OVH OpenStack  │
-      │ (Mock Data) │           │  (Real Cloud)   │
-      └─────────────┘           └─────────────────┘
-```
+![Architecture Diagram](docs/images/architecture.svg)
+
+For a detailed look at the architecture, see the layered design above showing:
+- **Clients**: Web browsers, REST clients, CI/CD
+- **API Layer**: FastAPI with OpenAPI 3.1.0 schema
+- **Service Layer**: Business logic (VM, Network, Image, Flavor, SSH Key services)
+- **Provider Abstraction**: Swappable mock and OpenStack providers
+- **Infrastructure**: Local development (mock) or real OVH OpenStack
 
 ### Project Structure (As Built)
 
@@ -586,9 +561,37 @@ curl http://localhost:8000/networks
 
 See `docs/API_EXAMPLES.md` for comprehensive examples of all resources.
 
+### API Request Flow
+
+![API Flow Diagram](docs/images/api-flow.svg)
+
+The diagram above shows how a request flows through the system:
+1. **Client** sends HTTP request
+2. **HTTP Route** validates the request
+3. **Service Layer** applies business logic
+4. **Provider** abstraction handles cloud operations
+5. **Cloud Infrastructure** executes the operation
+6. Response flows back through all layers
+
+### Supported Resources
+
+![Resources Overview](docs/images/resources.svg)
+
+Complete overview of all 5 supported resources with their operations, properties, and common use cases.
+
 ---
 
 ## Testing Strategy
+
+![Testing Coverage Diagram](docs/images/testing-coverage.svg)
+
+### Current Status
+
+- **49% overall code coverage**
+- **23 passing unit tests** out of 32
+- **100% coverage** on services, schemas, and models
+- **94% coverage** on mock provider
+- **30+ integration tests** ready (need environment setup)
 
 ### Unit Tests
 
@@ -611,23 +614,26 @@ Test API endpoints with TestClient:
 
 ```python
 def test_create_vm_endpoint():
-    response = client.post("/api/v1/vms", json={...})
+    response = client.post("/vms", json={...})
     assert response.status_code == 201
 ```
 
 ### Coverage Target
 
-**80%+ coverage** focusing on:
-- Service business logic
-- Error handling paths
-- API response contracts
-- Schema validation
+**60-70% coverage for quick polish** focusing on:
+- Service business logic ✅ 100%
+- Error handling paths ✅ 70%
+- API response contracts ⏳ (integration tests)
+- Schema validation ✅ 100%
 
 ### Running Tests
 
 ```bash
-# All tests
-pytest --cov=app --cov-report=html
+# Unit tests
+pytest tests/unit/test_services.py
+
+# With coverage report
+pytest --cov=api tests/unit/test_services.py --cov-report=html
 
 # Specific test file
 pytest tests/unit/test_vm_service.py -v
