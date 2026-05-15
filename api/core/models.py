@@ -55,6 +55,12 @@ class ImageStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class FlavorStatus(str, Enum):
+    """Flavor status."""
+    AVAILABLE = "AVAILABLE"
+    UNKNOWN = "UNKNOWN"
+
+
 @dataclass
 class VolumeAttachment:
     """Volume attachment to a VM."""
@@ -141,3 +147,22 @@ class VM:
     def is_stopped(self) -> bool:
         """Check if VM is stopped."""
         return self.status == VMStatus.STOPPED
+
+
+@dataclass
+class Flavor:
+    """Flavor domain model (VM instance type)."""
+    id: str
+    name: str
+    status: FlavorStatus = FlavorStatus.AVAILABLE
+    vcpus: Optional[int] = None
+    ram_mb: Optional[int] = None
+    disk_gb: Optional[int] = None
+    ephemeral_gb: Optional[int] = None  # Ephemeral disk space
+    swap_mb: Optional[int] = None
+    rxtx_factor: Optional[float] = None
+    is_public: bool = True
+    description: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None

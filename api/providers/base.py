@@ -7,7 +7,7 @@ consistent interface and behavior.
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from api.core.models import VM, Volume, Snapshot, Image
+from api.core.models import VM, Volume, Snapshot, Image, Flavor
 
 
 class BaseProvider(ABC):
@@ -285,5 +285,19 @@ class BaseProvider(ABC):
 
         Returns:
             Tuple of (list of images, total count)
+        """
+        pass
+
+    # Flavor Operations
+    @abstractmethod
+    async def list_flavors(self, limit: int = 100, offset: int = 0) -> tuple[List[Flavor], int]:
+        """List all available flavors with pagination.
+
+        Args:
+            limit: Maximum number of results
+            offset: Number of results to skip
+
+        Returns:
+            Tuple of (list of flavors, total count)
         """
         pass

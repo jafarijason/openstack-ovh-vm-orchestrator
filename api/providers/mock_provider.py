@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import uuid4
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, VolumeAttachment
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, VolumeAttachment
 from api.core.exceptions import NotFoundError, ConflictError, OperationNotAllowedError
 
 
@@ -22,8 +22,10 @@ class MockProvider(BaseProvider):
         self.volumes: dict[str, Volume] = {}
         self.snapshots: dict[str, Snapshot] = {}
         self.images: dict[str, Image] = {}
+        self.flavors: dict[str, Flavor] = {}
         self._connected = True
         self._initialize_sample_images()
+        self._initialize_sample_flavors()
 
     async def check_connection(self) -> bool:
         """Mock connection check always succeeds."""
@@ -377,3 +379,128 @@ class MockProvider(BaseProvider):
         images_list = list(self.images.values())
         total = len(images_list)
         return images_list[offset : offset + limit], total
+
+    async def list_flavors(self, limit: int = 100, offset: int = 0) -> tuple[List[Flavor], int]:
+        """List all mock flavors."""
+        flavors_list = list(self.flavors.values())
+        total = len(flavors_list)
+        return flavors_list[offset : offset + limit], total
+
+    def _initialize_sample_flavors(self):
+        """Initialize sample flavors for testing."""
+        sample_flavors = [
+            Flavor(
+                id="1",
+                name="m1.tiny",
+                status=FlavorStatus.AVAILABLE,
+                vcpus=1,
+                ram_mb=512,
+                disk_gb=1,
+                ephemeral_gb=0,
+                swap_mb=0,
+                rxtx_factor=1.0,
+                is_public=True,
+                description="Tiny flavor with 1 vCPU and 512MB RAM",
+                metadata={
+                    "_raw": {
+                        "id": "1",
+                        "name": "m1.tiny",
+                        "ram": 512,
+                        "disk": 1,
+                        "vcpus": 1,
+                        "ephemeral": 0,
+                        "swap": 0,
+                        "rxtx_factor": 1.0,
+                        "is_public": True,
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+            Flavor(
+                id="2",
+                name="m1.small",
+                status=FlavorStatus.AVAILABLE,
+                vcpus=1,
+                ram_mb=2048,
+                disk_gb=20,
+                ephemeral_gb=0,
+                swap_mb=0,
+                rxtx_factor=1.0,
+                is_public=True,
+                description="Small flavor with 1 vCPU and 2GB RAM",
+                metadata={
+                    "_raw": {
+                        "id": "2",
+                        "name": "m1.small",
+                        "ram": 2048,
+                        "disk": 20,
+                        "vcpus": 1,
+                        "ephemeral": 0,
+                        "swap": 0,
+                        "rxtx_factor": 1.0,
+                        "is_public": True,
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+            Flavor(
+                id="3",
+                name="m1.medium",
+                status=FlavorStatus.AVAILABLE,
+                vcpus=2,
+                ram_mb=4096,
+                disk_gb=40,
+                ephemeral_gb=0,
+                swap_mb=0,
+                rxtx_factor=1.0,
+                is_public=True,
+                description="Medium flavor with 2 vCPUs and 4GB RAM",
+                metadata={
+                    "_raw": {
+                        "id": "3",
+                        "name": "m1.medium",
+                        "ram": 4096,
+                        "disk": 40,
+                        "vcpus": 2,
+                        "ephemeral": 0,
+                        "swap": 0,
+                        "rxtx_factor": 1.0,
+                        "is_public": True,
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+            Flavor(
+                id="4",
+                name="m1.large",
+                status=FlavorStatus.AVAILABLE,
+                vcpus=4,
+                ram_mb=8192,
+                disk_gb=80,
+                ephemeral_gb=0,
+                swap_mb=0,
+                rxtx_factor=1.0,
+                is_public=True,
+                description="Large flavor with 4 vCPUs and 8GB RAM",
+                metadata={
+                    "_raw": {
+                        "id": "4",
+                        "name": "m1.large",
+                        "ram": 8192,
+                        "disk": 80,
+                        "vcpus": 4,
+                        "ephemeral": 0,
+                        "swap": 0,
+                        "rxtx_factor": 1.0,
+                        "is_public": True,
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+        ]
+        for flavor in sample_flavors:
+            self.flavors[flavor.id] = flavor

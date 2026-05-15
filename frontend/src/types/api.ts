@@ -357,6 +357,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/flavors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Flavors
+         * @description List available flavors with pagination.
+         *
+         *     Args:
+         *         request: FastAPI request
+         *         cloud: Cloud name (query parameter)
+         *         limit: Maximum number of results (default: 100, max: 1000)
+         *         offset: Number of results to skip (default: 0)
+         *
+         *     Returns:
+         *         List of flavors with pagination info
+         *
+         *     Example:
+         *         GET /flavors?cloud=ovh&limit=50&offset=0
+         */
+        get: operations["list_flavors_flavors_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clouds": {
         parameters: {
             query?: never;
@@ -615,6 +647,109 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /**
+         * FlavorResponse
+         * @description Flavor response model.
+         * @example {
+         *       "created_at": "2025-05-15T10:30:00Z",
+         *       "description": "Small flavor with 1 vCPU and 2GB RAM",
+         *       "disk_gb": 20,
+         *       "ephemeral_gb": 0,
+         *       "id": "2",
+         *       "is_public": true,
+         *       "metadata": {
+         *         "_raw": {
+         *           "disk": 20,
+         *           "id": "2",
+         *           "name": "m1.small",
+         *           "ram": 2048,
+         *           "vcpus": 1
+         *         }
+         *       },
+         *       "name": "m1.small",
+         *       "ram_mb": 2048,
+         *       "rxtx_factor": 1,
+         *       "status": "AVAILABLE",
+         *       "swap_mb": 0,
+         *       "updated_at": "2025-05-15T10:30:00Z",
+         *       "vcpus": 1
+         *     }
+         */
+        FlavorResponse: {
+            /**
+             * Id
+             * @description Unique flavor identifier
+             */
+            id: string;
+            /**
+             * Name
+             * @description Flavor name (e.g., 'm1.small', 't2.micro')
+             */
+            name: string;
+            /**
+             * Status
+             * @description Flavor status (AVAILABLE, UNKNOWN)
+             */
+            status: string;
+            /**
+             * Vcpus
+             * @description Number of virtual CPUs
+             */
+            vcpus?: number | null;
+            /**
+             * Ram Mb
+             * @description RAM in megabytes
+             */
+            ram_mb?: number | null;
+            /**
+             * Disk Gb
+             * @description Root disk size in gigabytes
+             */
+            disk_gb?: number | null;
+            /**
+             * Ephemeral Gb
+             * @description Ephemeral disk size in gigabytes
+             */
+            ephemeral_gb?: number | null;
+            /**
+             * Swap Mb
+             * @description Swap disk size in megabytes
+             */
+            swap_mb?: number | null;
+            /**
+             * Rxtx Factor
+             * @description Network receive/transmit bandwidth factor
+             */
+            rxtx_factor?: number | null;
+            /**
+             * Is Public
+             * @description Whether flavor is available to all projects
+             * @default true
+             */
+            is_public: boolean;
+            /**
+             * Description
+             * @description Flavor description
+             */
+            description?: string | null;
+            /**
+             * Metadata
+             * @description Flavor metadata including _raw OpenStack object
+             */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * @description Flavor creation timestamp
+             */
+            created_at?: string | null;
+            /**
+             * Updated At
+             * @description Last update timestamp
+             */
+            updated_at?: string | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -722,6 +857,22 @@ export interface components {
              * @description Last update timestamp
              */
             updated_at?: string | null;
+        };
+        /** ListResponse[FlavorResponse] */
+        ListResponse_FlavorResponse_: {
+            /**
+             * Success
+             * @description Operation succeeded
+             * @default true
+             */
+            success: boolean;
+            /**
+             * Data
+             * @description List of items
+             */
+            data: components["schemas"]["FlavorResponse"][];
+            /** @description Pagination metadata */
+            pagination: components["schemas"]["PaginationMeta"];
         };
         /** ListResponse[ImageResponse] */
         ListResponse_ImageResponse_: {
@@ -1675,6 +1826,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ListResponse_ImageResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_flavors_flavors_get: {
+        parameters: {
+            query?: {
+                cloud?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListResponse_FlavorResponse_"];
                 };
             };
             /** @description Validation Error */

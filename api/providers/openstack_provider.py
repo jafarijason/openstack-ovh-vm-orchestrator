@@ -8,7 +8,7 @@ maps cloud operations to the provider interface.
 from typing import List, Optional
 from datetime import datetime
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, VolumeAttachment
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, VolumeAttachment
 from api.core.exceptions import (
     CloudConnectionError,
     CloudOperationError,
@@ -579,4 +579,39 @@ class OpenStackProvider(BaseProvider):
             metadata=metadata,
             created_at=getattr(os_image, 'created_at', None),
             updated_at=getattr(os_image, 'updated_at', None),
+        )
+
+    async def list_flavors(self, limit: int = 100, offset: int = 0) -> tuple[List[Flavor], int]:
+        """List flavors from OpenStack."""
+        try:
+            compute = self.engine.get_compute()
+            # Get all flavors and paginate manually
+            all_flavors = list(compute.flavors())
+            total = len(all_flavors)
+            flavors_page = all_flavors[offset : offset + limit]
+            return [self._flavor_from_os(f) for f in flavors_page], total
+        except Exception as e:
+            raise CloudOperationError("list_flavors", str(e))
+
+    def _flavor_from_os(self, os_flavor) -> Flavor:
+        """Convert OpenStack flavor to domain model."""
+        # Preserve full OS object as _raw
+        metadata = {}
+        metadata["_raw"] = self._object_to_dict(os_flavor)
+        
+        return Flavor(
+            id=os_flavor.id,
+            name=os_flavor.name,
+            status=FlavorStatus.AVAILABLE,
+            vcpus=getattr(os_flavor, 'vcpus', None),
+            ram_mb=getattr(os_flavor, 'ram', None),
+            disk_gb=getattr(os_flavor, 'disk', None),
+            ephemeral_gb=getattr(os_flavor, 'ephemeral', None),
+            swap_mb=getattr(os_flavor, 'swap', None),
+            rxtx_factor=getattr(os_flavor, 'rxtx_factor', None),
+            is_public=getattr(os_flavor, 'is_public', True),
+            description=getattr(os_flavor, 'description', None),
+            metadata=metadata,
+            created_at=getattr(os_flavor, 'created_at', None),
+            updated_at=getattr(os_flavor, 'updated_at', None),
         )
