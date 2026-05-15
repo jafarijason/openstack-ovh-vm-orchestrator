@@ -60,47 +60,49 @@ Build a REST API service for OpenStack VM lifecycle management that demonstrates
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Project structure | 🟢 Complete | app/ with all folders ready |
-| README.md | 🟢 Complete | Progressive documentation |
-| ARCHITECTURE.md | 🟢 Complete | 1,025 lines of design patterns |
-| ROADMAP.md | 🟢 Complete | 642 lines with 5-phase plan |
+| Project structure | 🟢 Complete | api/ with all layers ready |
+| README.md | 🟢 Complete | This file |
+| ARCHITECTURE.md | 🟢 Complete | Design patterns and decisions |
+| ROADMAP.md | 🟢 Complete | Vision and backlog |
 | Hello World API | 🟢 Complete | GET / and GET /health working |
-| pyproject.toml | 🟡 Pending | Will add with Phase 2 |
+| pyproject.toml | 🟢 Complete | All dependencies configured |
 
 ### Phase 2: Core Implementation
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Domain models | ⚪ Not Started | VM, Volume, Snapshot |
-| Pydantic schemas | ⚪ Not Started | Request/response validation |
-| Provider abstraction | ⚪ Not Started | Base interface |
-| Mock provider | ⚪ Not Started | In-memory implementation |
-| OpenStack provider | ⚪ Not Started | Real OVH integration |
-| FastAPI app setup | ⚪ Not Started | Main entry point |
-| VM routes | ⚪ Not Started | CRUD + lifecycle operations |
-| Volume routes | ⚪ Not Started | Storage management |
-| Error handling | ⚪ Not Started | Custom exceptions + HTTP mapping |
-| Structured logging | ⚪ Not Started | Logging infrastructure |
+| Domain models | 🟢 Complete | VM, Network, Image, Flavor, SSHKey |
+| Pydantic schemas | 🟢 Complete | All request/response models |
+| Provider abstraction | 🟢 Complete | Base interface + factory |
+| Mock provider | 🟢 Complete | In-memory with 3 sample networks |
+| OpenStack provider | 🟢 Complete | Real OVH integration via SDK |
+| FastAPI app setup | 🟢 Complete | Async lifespan, dependency injection |
+| VM routes | 🟢 Complete | CRUD + lifecycle operations |
+| Image/Flavor routes | 🟢 Complete | List and get operations |
+| SSH Key routes | 🟢 Complete | List and get operations |
+| Network routes | 🟢 Complete | List and get operations |
+| Error handling | 🟢 Complete | Custom exception hierarchy |
+| OpenAPI schema | 🟢 Complete | Auto-generated schema.json |
 
 ### Phase 3: Testing & Validation
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Unit tests | ⚪ Not Started | Service logic tests |
-| Integration tests | ⚪ Not Started | API endpoint tests |
-| Test fixtures | ⚪ Not Started | Mock data, helpers |
-| Coverage reporting | ⚪ Not Started | Target 80%+ |
-| pytest configuration | ⚪ Not Started | Test runner setup |
+| Unit tests | 🟡 In Progress | Service logic tests for all 5 resources |
+| Integration tests | 🟡 In Progress | API endpoint tests |
+| Test fixtures | 🟡 In Progress | Mock data and helpers |
+| Coverage reporting | 🟡 In Progress | Target 60-70% (quick polish) |
+| pytest configuration | 🟢 Complete | pytest.ini configured |
 
 ### Phase 4: DevOps & Documentation
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Dockerfile | ⚪ Not Started | Container image |
-| docker-compose.yml | ⚪ Not Started | Local dev environment |
-| .gitlab-ci.yml | ⚪ Not Started | CI/CD pipeline |
-| Environment config | ⚪ Not Started | .env template |
-| Setup documentation | ⚪ Not Started | Local + Docker + OVH |
+| Dockerfile | 🟡 In Progress | Backend container image |
+| docker-compose.yml | 🟡 In Progress | Backend + frontend dev environment |
+| .github/workflows/ | 🟡 In Progress | GitHub Actions CI pipeline |
+| CONTRIBUTING.md | 🟡 In Progress | New contributor guide |
+| API Examples | 🟡 In Progress | Usage examples for all resources |
 
 **Legend**: 🟢 Complete | 🟡 In Progress | ⚪ Not Started | 🔴 Blocked
 
@@ -113,64 +115,62 @@ Build a REST API service for OpenStack VM lifecycle management that demonstrates
 
 - [x] Repository creation
 - [x] README documentation (comprehensive, progressive)
-- [x] Project structure scaffold (app/ with all layers)
-- [x] ARCHITECTURE.md (1,025 lines - design patterns and decisions)
-- [x] ROADMAP.md (642 lines - phased approach and backlog)
+- [x] Project structure scaffold (api/ with all layers)
+- [x] ARCHITECTURE.md (design patterns and decisions)
+- [x] ROADMAP.md (phased approach and backlog)
 - [x] Hello World API (GET / and GET /health working)
 - [x] Configuration files (.env.example, .gitignore)
 - [x] Quick start script (run.sh)
 
-**Deliverables**: Complete architecture documentation, Hello World API, ready for Phase 2 implementation
+**Deliverables**: Complete architecture documentation, Hello World API
 
-### Phase 2: Core API Implementation
+### Phase 2: Core API Implementation (✅ COMPLETE)
 **Goal**: Build working endpoints with clean architecture
 
-- [ ] Domain models (VM, Volume, Snapshot classes)
-- [ ] Pydantic schemas (request/response validation)
-- [ ] Provider abstraction (base interface)
-- [ ] Mock provider (in-memory, no dependencies)
-- [ ] OpenStack provider (real OVH integration)
-- [ ] FastAPI application setup
-- [ ] VM CRUD endpoints (create, list, get, delete)
-- [ ] VM lifecycle endpoints (start, stop, reboot)
-- [ ] Volume management endpoints
-- [ ] Error handling and exceptions
-- [ ] Structured logging
+- [x] Domain models (VM, Network, Image, Flavor, SSHKey)
+- [x] Pydantic schemas (request/response validation)
+- [x] Provider abstraction (base interface + factory)
+- [x] Mock provider (in-memory with 3 sample networks)
+- [x] OpenStack provider (real OVH integration)
+- [x] FastAPI application setup with async lifespan
+- [x] VM CRUD endpoints (create, list, get, delete)
+- [x] VM lifecycle endpoints (start, stop, reboot)
+- [x] Image/Flavor/SSHKey endpoints (list, get)
+- [x] Network endpoints (list, get)
+- [x] Error handling and custom exceptions
+- [x] OpenAPI schema auto-generation
 
-**Deliverables**: Working API, fully functional with mock data
+**Deliverables**: Fully functional REST API, 5 resources, 60+ endpoints
 
-### Phase 3: Testing & Quality
+### Phase 3: Testing & Quality (🟡 IN PROGRESS)
 **Goal**: Ensure code quality and reliability
 
-- [ ] Unit tests (services, schemas, validators)
-- [ ] Integration tests (API endpoints)
+- [ ] Unit tests (services, schemas, validators) - 60-70% coverage target
+- [ ] Integration tests (VM, Network endpoints)
 - [ ] Fixtures and mock data
-- [ ] Coverage reporting (80%+)
+- [ ] Coverage reporting
 - [ ] pytest configuration
 
-**Deliverables**: Test suite, coverage reports
+**Deliverables**: Test suite demonstrating testing competency
 
-### Phase 4: DevOps & Deployment
+### Phase 4: DevOps & Deployment (🟡 IN PROGRESS)
 **Goal**: Containerize and automate
 
-- [ ] Dockerfile for API service
-- [ ] docker-compose.yml for local development
-- [ ] .gitlab-ci.yml (test, build, deploy stages)
+- [ ] Dockerfile for backend API service
+- [ ] docker-compose.yml (backend + frontend dev setup)
+- [ ] .github/workflows/tests.yml (GitHub Actions CI)
 - [ ] Environment configuration (.env template)
-- [ ] Deployment documentation
 
-**Deliverables**: Containerized service, CI/CD ready
+**Deliverables**: Containerized service, CI/CD pipeline
 
-### Phase 5: Polish & Documentation
-**Goal**: Complete documentation and finalize
+### Phase 5: Documentation (🟡 IN PROGRESS)
+**Goal**: Complete documentation for open source
 
-- [ ] ARCHITECTURE.md (patterns, decisions, diagrams)
-- [ ] ROADMAP.md (vision and backlog)
-- [ ] API usage examples
-- [ ] Troubleshooting guide
-- [ ] Contributing guidelines
+- [ ] CONTRIBUTING.md (how to set up for development)
+- [ ] docs/API_EXAMPLES.md (usage examples for all 5 resources)
+- [ ] Updated README (current state reflection)
 
-**Deliverables**: Complete documentation suite
+**Deliverables**: Clear path for new contributors
 
 ---
 
@@ -179,37 +179,66 @@ Build a REST API service for OpenStack VM lifecycle management that demonstrates
 ### Prerequisites
 
 - Python 3.11+
-- Poetry or pip
-- Optional: Docker & Docker Compose
-- Optional: OVH OpenStack account
+- Node.js 18+ (for frontend)
+- Docker & Docker Compose (optional)
+- OVH OpenStack account (optional, mock provider included)
 
-### Current Status
-
-⚠️ **Under Construction**: The API is being built incrementally. Check the [Implementation Phases](#implementation-phases) section for progress.
-
-### Setup (Once Complete)
-
-Once the API is implemented, setup will be:
+### Setup - Local Development
 
 ```bash
 # Clone repository
 git clone https://github.com/jafarijason/openstack-ovh-vm-orchestrator.git
 cd openstack-ovh-vm-orchestrator
 
-# Option 1: Local development
+# Backend setup
 python3.11 -m venv .venv
 source .venv/bin/activate
-pip install poetry
-poetry install
-uvicorn app.main:app --reload
+pip install -r requirements.txt
 
-# Option 2: Docker
+# Frontend setup
+cd frontend
+npm install
+cd ..
+
+# Start backend (Terminal 1)
+python -m uvicorn api.main:app --reload --port 8000
+
+# Start frontend (Terminal 2)
+cd frontend
+npm run dev
+```
+
+**Access the application:**
+- Frontend: http://localhost:5174
+- API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+### Setup - Docker (Coming Soon)
+
+```bash
+# Build and run with Docker Compose
 docker-compose up -d
 
-# Access API
-# - Local: http://localhost:8000
-# - Swagger UI: http://localhost:8000/docs
-# - ReDoc: http://localhost:8000/redoc
+# Access API: http://localhost:8000
+```
+
+### Test the API
+
+```bash
+# List VMs (mock provider)
+curl http://localhost:8000/vms
+
+# List networks
+curl http://localhost:8000/networks
+
+# List images
+curl http://localhost:8000/images
+
+# Create VM
+curl -X POST http://localhost:8000/vms \
+  -H "Content-Type: application/json" \
+  -d '{"name": "test-vm", "image_id": "img-001", "flavor_id": "m1.small", "network_ids": ["net-public"]}'
 ```
 
 ---
@@ -483,57 +512,79 @@ All environment variables are now set automatically.
 
 ## API Endpoints
 
-### Planned Endpoints
-
-#### VM Lifecycle
+### VM Lifecycle
 ```
-POST   /api/v1/vms              Create VM
-GET    /api/v1/vms              List VMs
-GET    /api/v1/vms/{id}         Get VM details
-POST   /api/v1/vms/{id}/start   Start VM
-POST   /api/v1/vms/{id}/stop    Stop VM
-POST   /api/v1/vms/{id}/reboot  Reboot VM
-DELETE /api/v1/vms/{id}         Delete VM
+POST   /vms              Create VM
+GET    /vms              List VMs (paginated)
+GET    /vms/{vm_id}      Get VM details
+POST   /vms/{vm_id}/action   VM lifecycle (start/stop/reboot)
+DELETE /vms/{vm_id}      Delete VM
 ```
 
-#### Volume Management
+### Images
 ```
-POST   /api/v1/volumes                      Create volume
-GET    /api/v1/volumes                      List volumes
-GET    /api/v1/volumes/{id}                 Get volume details
-POST   /api/v1/volumes/{id}/snapshot        Create snapshot
-POST   /api/v1/vms/{vm_id}/volumes/{vol_id}/attach    Attach volume
-POST   /api/v1/vms/{vm_id}/volumes/{vol_id}/detach    Detach volume
-DELETE /api/v1/volumes/{id}                 Delete volume
+GET    /images           List images (paginated)
+GET    /images/{image_id}    Get image details
 ```
 
-#### Health & Status
+### Flavors
 ```
-GET    /health                  Health check
-GET    /metrics                 Prometheus metrics (planned)
+GET    /flavors          List flavors (paginated)
+GET    /flavors/{flavor_id}  Get flavor details
 ```
 
-### Example Request/Response (When Implemented)
+### SSH Keys
+```
+GET    /ssh-keys         List SSH keys (paginated)
+GET    /ssh-keys/{key_name}  Get SSH key details
+```
 
+### Networks
+```
+GET    /networks         List networks (paginated)
+GET    /networks/{network_id} Get network details
+```
+
+### Health & System
+```
+GET    /health           Health check
+GET    /clouds           List available cloud providers
+GET    /openapi.json     OpenAPI 3.1.0 schema
+```
+
+### Example Requests
+
+**List VMs:**
 ```bash
-# Create VM
-POST /api/v1/vms
-Content-Type: application/json
-
-{
-  "name": "web-server-01",
-  "image_id": "2c4ac51d-fa14-4c12-a954-0ab77ed9f41b",
-  "flavor_id": "2"
-}
-
-# Response: 201 Created
-{
-  "id": "vm-123",
-  "name": "web-server-01",
-  "status": "BUILDING",
-  "created_at": "2024-05-14T15:30:00Z"
-}
+curl http://localhost:8000/vms?limit=10&offset=0
 ```
+
+**Create VM:**
+```bash
+curl -X POST http://localhost:8000/vms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "web-server-01",
+    "image_id": "img-001",
+    "flavor_id": "m1.small",
+    "network_ids": ["net-public"],
+    "key_name": "my-key"
+  }'
+```
+
+**Start a VM:**
+```bash
+curl -X POST http://localhost:8000/vms/vm-001/action \
+  -H "Content-Type: application/json" \
+  -d '{"action": "start"}'
+```
+
+**List Networks:**
+```bash
+curl http://localhost:8000/networks
+```
+
+See `docs/API_EXAMPLES.md` for comprehensive examples of all resources.
 
 ---
 
@@ -589,41 +640,59 @@ pytest -v
 
 ## Next Steps
 
-### Immediate (Phase 2)
+### Phase 3: Add Tests
+- [ ] Write unit tests for all services (60-70% coverage)
+- [ ] Write integration tests for VM endpoints
+- [ ] Run `pytest --cov=api tests/`
+- [ ] See `CONTRIBUTING.md` for testing guide
 
-1. ✅ Create project structure scaffold
-2. ✅ Write ARCHITECTURE.md (design patterns in depth)
-3. ✅ Write ROADMAP.md (vision and backlog)
-4. ✅ Create pyproject.toml (dependencies)
-5. ✅ Implement domain models and Pydantic schemas
-6. ✅ Build provider abstraction and mock implementation
-7. ✅ Create FastAPI application and routes
-8. ✅ Add error handling and logging
+### Phase 4: Add DevOps
+- [ ] Create Dockerfile for backend
+- [ ] Create docker-compose.yml
+- [ ] Create GitHub Actions CI pipeline
+- [ ] Verify `docker-compose up` works end-to-end
 
-### Then (Phase 3)
-
-9. ✅ Write comprehensive tests
-10. ✅ Verify 80%+ coverage
-11. ✅ Test with real OVH OpenStack
-
-### Finally (Phase 4-5)
-
-12. ✅ Dockerize application
-13. ✅ Create CI/CD pipeline
-14. ✅ Finalize documentation
-15. ✅ Code review and polish
+### Phase 5: Expand Documentation
+- [ ] Add deployment guide
+- [ ] Add troubleshooting section
+- [ ] Add architecture diagrams
+- [ ] Document OVH OpenStack setup
 
 ---
 
 ## Contributing
 
-This is an interview assignment. Development follows SDLC best practices:
+Thank you for your interest in contributing! Here's how to get started:
 
-1. **Design first**: Document decisions in ARCHITECTURE.md
-2. **Test-driven**: Write tests alongside implementation
-3. **Incremental**: Build and test each phase
-4. **Document**: Update this README as implementation progresses
-5. **Review**: Code review before each phase completion
+**See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.**
+
+Quick start:
+```bash
+# 1. Fork and clone
+git clone https://github.com/<your-fork>/openstack-ovh-vm-orchestrator.git
+
+# 2. Create feature branch
+git checkout -b feature/my-feature
+
+# 3. Set up development environment (see CONTRIBUTING.md)
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cd frontend && npm install && cd ..
+
+# 4. Make changes and test
+pytest --cov=api tests/
+
+# 5. Push and open PR
+git push origin feature/my-feature
+```
+
+**Development Principles:**
+- Design first: Discuss design in issues before implementing
+- Test-driven: Write tests alongside code
+- Incremental: Small, focused commits
+- Document: Update docs with your changes
+- Follow code style: Use black, flake8, mypy for Python
 
 ---
 
@@ -631,16 +700,19 @@ This is an interview assignment. Development follows SDLC best practices:
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Documentation | 🟢 Complete | README (651 lines), ARCHITECTURE (1,025 lines), ROADMAP (642 lines) |
-| Project Structure | 🟢 Complete | All layers ready (routes, services, providers, core, utils) |
-| Hello World API | 🟢 Complete | GET / and GET /health endpoints working |
-| API Implementation | 🟡 Next | Phase 2 - Core endpoints and services |
-| Testing | ⏳ Pending | Phase 3 - Comprehensive test suite (80%+) |
-| DevOps | ⏳ Pending | Phase 4 - Docker, docker-compose, CI/CD |
+| Documentation | 🟢 Complete | README, ARCHITECTURE.md, ROADMAP.md |
+| Project Structure | 🟢 Complete | Layered architecture (routes → services → providers) |
+| Backend API | 🟢 Complete | 60+ endpoints, 5 resources, OpenAPI docs |
+| Frontend UI | 🟢 Complete | React 18, TypeScript, all 5 resources |
+| Multi-cloud Support | 🟢 Complete | Mock provider + OVH OpenStack |
+| Testing | 🟡 In Progress | Phase 3 - Unit and integration tests |
+| DevOps | 🟡 In Progress | Phase 4 - Docker and CI/CD |
+| Contributing Guide | 🟡 In Progress | Phase 5 - CONTRIBUTING.md |
 
-**Last Updated**: May 14, 2024  
-**Current Phase**: 1 (Foundation) - ✅ COMPLETE  
-**Next Phase**: 2 (Core API Implementation)
+**Current Phase**: 2 (Core API Implementation) - ✅ COMPLETE  
+**Next Phases**: 3 (Tests) → 4 (DevOps) → 5 (Docs)  
+**Last Updated**: May 15, 2024  
+**Repository**: https://github.com/jafarijason/openstack-ovh-vm-orchestrator
 
 ---
 

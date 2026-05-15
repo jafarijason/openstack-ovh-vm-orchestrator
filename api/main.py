@@ -5,16 +5,24 @@ Main FastAPI application entry point for VM lifecycle management.
 """
 
 # ============================================================================
-# DEBUGPY - Attach debugger at startup
+# DEBUGPY - Attach debugger at startup (skip during testing)
 # ============================================================================
-import debugpy
+import os
+import sys
 
-port = 5162
-debugpy.listen(("localhost", port))
-print(f"\n[DEBUG] Debugpy listening on localhost:{port}")
-print(f"[DEBUG] Waiting for debugger to attach...")
-# debugpy.wait_for_client()
-print(f"[DEBUG] Debugger attached!")
+if "pytest" not in sys.modules and os.getenv("PYTEST_RUNNING") != "1":
+    try:
+        import debugpy
+
+        port = 5162
+        debugpy.listen(("localhost", port))
+        print(f"\n[DEBUG] Debugpy listening on localhost:{port}")
+        print(f"[DEBUG] Waiting for debugger to attach...")
+        # debugpy.wait_for_client()
+        print(f"[DEBUG] Debugger attached!")
+    except RuntimeError:
+        # Port already in use, skip debugpy
+        pass
 # ============================================================================
 
 import json
