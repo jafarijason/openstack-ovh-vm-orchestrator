@@ -5,9 +5,13 @@
 [![FastAPI](https://img.shields.io/badge/fastapi-0.136+-green.svg)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> 🏆 **Lab Assessment Project** for **Sr. Platform Engineer** position at [**Intuitive.ai**](https://www.linkedin.com/company/intuitiveaiglobal/)  
+> ⏱️ Completed in **5 hours** | 📋 [Lab_Assessment.docx](docs/Lab_Assessment.docx)  
+> 🤖 Built with [OpenCode](https://opencode.ai) & Claude Haiku 4.5
+
 **REST API for managing OpenStack VM lifecycle operations using FastAPI and OpenStack SDK.**
 
-An interview assignment proof-of-concept demonstrating clean architecture, API design, Python development fundamentals, and platform engineering thinking.
+An lab assessment proof-of-concept demonstrating enterprise-grade architecture, API design, Python development fundamentals, and platform engineering thinking.
 
 ---
 
