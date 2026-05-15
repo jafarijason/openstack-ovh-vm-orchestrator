@@ -9,7 +9,7 @@ import type { components } from '../types/api';
 type SSHKeyResponse = components['schemas']['SSHKeyResponse'];
 
 export const SSHKeyList: React.FC = () => {
-  const { activeCloud, activeClouds } = useCloudStore();
+  const { activeCloud } = useCloudStore();
   const [sshKeys, setSSHKeys] = useState<SSHKeyResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

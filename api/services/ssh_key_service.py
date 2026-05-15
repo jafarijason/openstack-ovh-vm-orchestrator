@@ -16,6 +16,20 @@ class SSHKeyService:
         """
         self.provider = provider
 
+    async def get_ssh_key(self, key_name: str) -> SSHKey:
+        """Get SSH key by name.
+        
+        Args:
+            key_name: SSH key name
+            
+        Returns:
+            SSHKey object
+            
+        Raises:
+            NotFoundError: If SSH key not found
+        """
+        return await self.provider.get_ssh_key(key_name)
+
     async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> Tuple[List[SSHKey], int]:
         """List all SSH keys.
         

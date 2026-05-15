@@ -192,8 +192,8 @@ class TestNetworkService:
 
     async def test_list_networks_with_pagination(self, network_service):
         """Test listing networks with pagination."""
-        networks_page1 = await network_service.list_networks(limit=1, offset=0)
-        networks_page2 = await network_service.list_networks(limit=1, offset=1)
+        networks_page1, total1 = await network_service.list_networks(limit=1, offset=0)
+        networks_page2, total2 = await network_service.list_networks(limit=1, offset=1)
 
         assert len(networks_page1) <= 1
         assert len(networks_page2) <= 1
@@ -239,8 +239,8 @@ class TestImageService:
 
     async def test_list_images_with_pagination(self, image_service):
         """Test listing images with pagination."""
-        images_page1 = await image_service.list_images(limit=1, offset=0)
-        images_page2 = await image_service.list_images(limit=1, offset=1)
+        images_page1, total1 = await image_service.list_images(limit=1, offset=0)
+        images_page2, total2 = await image_service.list_images(limit=1, offset=1)
 
         assert len(images_page1) <= 1
         assert len(images_page2) <= 1
@@ -276,8 +276,8 @@ class TestFlavorService:
 
     async def test_list_flavors_with_pagination(self, flavor_service):
         """Test listing flavors with pagination."""
-        flavors_page1 = await flavor_service.list_flavors(limit=1, offset=0)
-        flavors_page2 = await flavor_service.list_flavors(limit=1, offset=1)
+        flavors_page1, total1 = await flavor_service.list_flavors(limit=1, offset=0)
+        flavors_page2, total2 = await flavor_service.list_flavors(limit=1, offset=1)
 
         assert len(flavors_page1) <= 1
         assert len(flavors_page2) <= 1
@@ -311,8 +311,8 @@ class TestSSHKeyService:
 
     async def test_list_ssh_keys_with_pagination(self, ssh_key_service):
         """Test listing SSH keys with pagination."""
-        keys_page1 = await ssh_key_service.list_ssh_keys(limit=1, offset=0)
-        keys_page2 = await ssh_key_service.list_ssh_keys(limit=1, offset=1)
+        keys_page1, total1 = await ssh_key_service.list_ssh_keys(limit=1, offset=0)
+        keys_page2, total2 = await ssh_key_service.list_ssh_keys(limit=1, offset=1)
 
         assert len(keys_page1) <= 1
         assert len(keys_page2) <= 1

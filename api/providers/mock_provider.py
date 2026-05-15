@@ -45,6 +45,14 @@ class MockProvider(BaseProvider):
         metadata: Optional[dict] = None,
     ) -> VM:
         """Create a mock VM."""
+        # Validate inputs
+        if not name or not name.strip():
+            from api.core.exceptions import ValidationError
+            raise ValidationError("VM name cannot be empty")
+        if not network_ids:
+            from api.core.exceptions import ValidationError
+            raise ValidationError("At least one network ID is required")
+        
         vm = VM(
             id=f"vm-{uuid4().hex[:8]}",
             name=name,
@@ -78,7 +86,7 @@ class MockProvider(BaseProvider):
     async def delete_vm(self, vm_id: str) -> bool:
         """Delete a mock VM."""
         if vm_id not in self.vms:
-            return False
+            raise NotFoundError("VM", vm_id)
         del self.vms[vm_id]
         return True
 
@@ -225,11 +233,23 @@ class MockProvider(BaseProvider):
         for image in sample_images:
             self.images[image.id] = image
 
+    async def get_image(self, image_id: str) -> Image:
+        """Get image by ID."""
+        if image_id not in self.images:
+            raise NotFoundError("Image", image_id)
+        return self.images[image_id]
+
     async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:
         """List all mock images."""
         images_list = list(self.images.values())
         total = len(images_list)
         return images_list[offset : offset + limit], total
+
+    async def get_flavor(self, flavor_id: str) -> Flavor:
+        """Get flavor by ID."""
+        if flavor_id not in self.flavors:
+            raise NotFoundError("Flavor", flavor_id)
+        return self.flavors[flavor_id]
 
     async def list_flavors(self, limit: int = 100, offset: int = 0) -> tuple[List[Flavor], int]:
         """List all mock flavors."""
@@ -355,6 +375,12 @@ class MockProvider(BaseProvider):
         ]
         for flavor in sample_flavors:
             self.flavors[flavor.id] = flavor
+
+    async def get_ssh_key(self, key_name: str) -> SSHKey:
+        """Get SSH key by name."""
+        if key_name not in self.ssh_keys:
+            raise NotFoundError("SSHKey", key_name)
+        return self.ssh_keys[key_name]
 
     async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> tuple[List[SSHKey], int]:
         """List all mock SSH keys."""

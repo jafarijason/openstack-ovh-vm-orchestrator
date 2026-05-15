@@ -14,6 +14,7 @@ services:
       OS_CLOUD: mock
       LOG_LEVEL: INFO
       PYTHONUNBUFFERED: 1
+    platform: linux/amd64
     volumes:
       # Mount local code for development (remove for production)
       - ./api:/app/api
@@ -33,6 +34,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: openstack-orchestrator-frontend
+    platform: linux/amd64
     ports:
       - "5174:5174"
     environment:
@@ -50,7 +52,7 @@ networks:
   openstack-network:
     driver: bridge
 
-volumes:
+volumes: {}
   # Define named volumes if needed for persistence
   # api-data:
   # frontend-build:

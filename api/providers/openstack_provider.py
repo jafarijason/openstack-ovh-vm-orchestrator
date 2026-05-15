@@ -297,6 +297,19 @@ class OpenStackProvider(BaseProvider):
             raise CloudOperationError("reboot_vm", str(e))
 
     # Image Operations
+    async def get_image(self, image_id: str) -> Image:
+        """Get image by ID from OpenStack."""
+        try:
+            image = self.engine.get_image()
+            os_image = image.find_image(image_id, ignore_missing=False)
+            if not os_image:
+                raise NotFoundError("Image", image_id)
+            return self._image_from_os(os_image)
+        except Exception as e:
+            if isinstance(e, NotFoundError):
+                raise
+            raise CloudOperationError("get_image", str(e))
+
     async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:
         """List images from OpenStack."""
         try:
@@ -335,6 +348,19 @@ class OpenStackProvider(BaseProvider):
             updated_at=getattr(os_image, 'updated_at', None),
         )
 
+    async def get_flavor(self, flavor_id: str) -> Flavor:
+        """Get flavor by ID from OpenStack."""
+        try:
+            compute = self.engine.get_compute()
+            os_flavor = compute.find_flavor(flavor_id, ignore_missing=False)
+            if not os_flavor:
+                raise NotFoundError("Flavor", flavor_id)
+            return self._flavor_from_os(os_flavor)
+        except Exception as e:
+            if isinstance(e, NotFoundError):
+                raise
+            raise CloudOperationError("get_flavor", str(e))
+
     async def list_flavors(self, limit: int = 100, offset: int = 0) -> tuple[List[Flavor], int]:
         """List flavors from OpenStack."""
         try:
@@ -369,6 +395,19 @@ class OpenStackProvider(BaseProvider):
             created_at=getattr(os_flavor, 'created_at', None),
             updated_at=getattr(os_flavor, 'updated_at', None),
         )
+
+    async def get_ssh_key(self, key_name: str) -> SSHKey:
+        """Get SSH key by name from OpenStack."""
+        try:
+            compute = self.engine.get_compute()
+            os_keypair = compute.find_keypair(key_name, ignore_missing=False)
+            if not os_keypair:
+                raise NotFoundError("SSHKey", key_name)
+            return self._ssh_key_from_os(os_keypair)
+        except Exception as e:
+            if isinstance(e, NotFoundError):
+                raise
+            raise CloudOperationError("get_ssh_key", str(e))
 
     async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> tuple[List[SSHKey], int]:
         """List SSH keys from OpenStack."""

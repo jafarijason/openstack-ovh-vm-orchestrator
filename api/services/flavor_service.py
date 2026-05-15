@@ -30,3 +30,17 @@ class FlavorService:
             CloudOperationError: If cloud operation fails
         """
         return await self.provider.list_flavors(limit=limit, offset=offset)
+
+    async def get_flavor(self, flavor_id: str) -> Flavor:
+        """Get flavor by ID.
+        
+        Args:
+            flavor_id: Flavor unique identifier
+            
+        Returns:
+            Flavor object
+            
+        Raises:
+            NotFoundError: If flavor not found
+        """
+        return await self.provider.get_flavor(flavor_id)

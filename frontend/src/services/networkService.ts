@@ -1,7 +1,7 @@
 import type { components } from '../types/api';
 
 type NetworkResponse = components['schemas']['NetworkResponse'];
-type ListResponse = components['schemas']['ListResponse'];
+type ListNetworksResponse = components['schemas']['ListResponse_NetworkResponse_'];
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -14,7 +14,7 @@ export const networkService = {
 
     const response = await fetch(`${API_BASE}/networks?${params}`);
     if (!response.ok) throw new Error('Failed to list networks');
-    const data = (await response.json()) as ListResponse & { data: NetworkResponse[] };
+    const data = (await response.json()) as ListNetworksResponse;
     return data.data;
   },
 

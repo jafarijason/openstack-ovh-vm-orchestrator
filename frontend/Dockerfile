@@ -1,15 +1,15 @@
 # Frontend - React + Vite
 
 # Build stage
-FROM node:18-alpine as builder
+FROM node:20 as builder
 
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json ./
+COPY yarn.lock ./
 
-# Install dependencies
-RUN npm ci
+RUN yarn install
 
 # Copy source
 COPY . .
@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # Runtime stage
-FROM node:18-alpine
+FROM node:20
 
 WORKDIR /app
 

@@ -97,6 +97,15 @@ class BaseProvider(ABC):
         pass
     # Image Operations
     @abstractmethod
+    async def get_image(self, image_id: str) -> Image:
+        """Get image by ID.
+        Args:
+            image_id: Image unique identifier
+        Returns:
+            Image object
+        """
+        pass
+    @abstractmethod
     async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:
         """List all available images with pagination.
         Args:
@@ -108,6 +117,15 @@ class BaseProvider(ABC):
         pass
     # Flavor Operations
     @abstractmethod
+    async def get_flavor(self, flavor_id: str) -> Flavor:
+        """Get flavor by ID.
+        Args:
+            flavor_id: Flavor unique identifier
+        Returns:
+            Flavor object
+        """
+        pass
+    @abstractmethod
     async def list_flavors(self, limit: int = 100, offset: int = 0) -> tuple[List[Flavor], int]:
         """List all available flavors with pagination.
         Args:
@@ -118,6 +136,15 @@ class BaseProvider(ABC):
         """
         pass
     # SSH Key Operations
+    @abstractmethod
+    async def get_ssh_key(self, key_name: str) -> SSHKey:
+        """Get SSH key by name.
+        Args:
+            key_name: SSH key name
+        Returns:
+            SSHKey object
+        """
+        pass
     @abstractmethod
     async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> tuple[List[SSHKey], int]:
         """List all SSH keys with pagination.

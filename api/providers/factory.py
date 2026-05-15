@@ -30,6 +30,12 @@ def create_provider(cloud_name: Optional[str] = None) -> BaseProvider:
         ValueError: If no cloud configured
         CloudConnectionError: If unable to connect to cloud
     """
+    # Special case: if cloud_name is 'mock', return MockProvider directly
+    if cloud_name == "mock":
+        logger.info("Creating provider for cloud: mock")
+        logger.info("Initializing Mock provider")
+        return MockProvider()
+    
     clouds_config = get_clouds_config()
 
     # Determine which cloud to use

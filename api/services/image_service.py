@@ -31,3 +31,17 @@ class ImageService:
             Tuple of (list of images, total count)
         """
         return await self.provider.list_images(limit=limit, offset=offset)
+
+    async def get_image(self, image_id: str) -> Image:
+        """Get image by ID.
+
+        Args:
+            image_id: Image unique identifier
+
+        Returns:
+            Image object
+
+        Raises:
+            NotFoundError: If image not found
+        """
+        return await self.provider.get_image(image_id)
