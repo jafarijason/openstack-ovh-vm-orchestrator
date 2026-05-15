@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { vmService } from '../services/vmService';
+import { useCloudStore } from '../stores/cloudStore';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import type { components } from '../types/api';
@@ -7,18 +8,16 @@ import type { components } from '../types/api';
 type VMResponse = components['schemas']['VMResponse'];
 
 export const Dashboard: React.FC = () => {
+  const { activeCloud, activeClouds } = useCloudStore();
   const [vms, setVms] = useState<VMResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  const loadDashboard = async () => {
+  const loadDashboard = async (cloud: string) => {
     try {
       setLoading(true);
-      const response = await vmService.listVMs(10, 0);
+      setVms([]); // Clear old data immediately when cloud changes
+      const response = await vmService.listVMs(10, 0, cloud);
       setVms(response.data);
       setError(null);
     } catch (err) {
@@ -28,6 +27,13 @@ export const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Only load when we have clouds fetched and activeCloud is set
+    if (activeClouds.length > 0 && activeCloud) {
+      loadDashboard(activeCloud);
+    }
+  }, [activeCloud, activeClouds]);
 
   const vmStats = {
     total: vms.length,

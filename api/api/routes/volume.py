@@ -1,5 +1,6 @@
 """Volume API routes."""
 
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from api.api.schemas.common import SuccessResponse
 from api.api.schemas.volume import (
@@ -14,17 +15,44 @@ from api.api.schemas.volume import (
 from api.services.volume_service import VolumeService
 from api.core.exceptions import OrchestratorException
 from api.core.models import Volume, Snapshot
+from api.providers.factory import create_provider
 
 router = APIRouter(prefix="/volumes", tags=["Volumes"])
 snapshot_router = APIRouter(prefix="/snapshots", tags=["Snapshots"])
 
 
-def get_volume_service(request: Request) -> VolumeService:
-    """Get volume service instance from app state."""
-    service = request.app.state.volume_service
-    if service is None:
-        raise RuntimeError("Volume service not initialized")
-    return service
+def get_volume_service(request: Request, cloud: Optional[str] = Query(None)) -> VolumeService:
+    """Get volume service instance from app state or create for specified cloud.
+    
+    Args:
+        request: FastAPI request object
+        cloud: Optional cloud name to use. If not provided, uses default cloud.
+    
+    Returns:
+        VolumeService instance
+    """
+    try:
+        # Get the active cloud from app state
+        active_cloud = getattr(request.app.state, 'active_cloud', None)
+        
+        # If cloud param matches active cloud, use the pre-initialized service from app state
+        if cloud and cloud == active_cloud:
+            service = request.app.state.volume_service
+            if service is None:
+                raise RuntimeError("Volume service not initialized")
+            return service
+        elif cloud:
+            # Create provider for specified cloud
+            provider = create_provider(cloud_name=cloud)
+            return VolumeService(provider)
+        else:
+            # Use default service from app state
+            service = request.app.state.volume_service
+            if service is None:
+                raise RuntimeError("Volume service not initialized")
+            return service
+    except Exception as e:
+        raise HTTPException(status_code=400, detail={"code": "INVALID_CLOUD", "message": str(e)})
 
 
 def volume_to_response(vol: Volume) -> VolumeResponse:
@@ -69,6 +97,7 @@ def snapshot_to_response(snap: Snapshot) -> SnapshotResponse:
 @router.post("", response_model=SuccessResponse[VolumeResponse], status_code=201)
 async def create_volume(
     request: CreateVolumeRequest,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """Create a new volume.
@@ -100,6 +129,7 @@ async def create_volume(
 @router.get("/{volume_id}", response_model=SuccessResponse[VolumeResponse])
 async def get_volume(
     volume_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """Get volume by ID.
@@ -125,6 +155,7 @@ async def get_volume(
 async def list_volumes(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """List all volumes with pagination.
@@ -160,6 +191,7 @@ async def list_volumes(
 async def attach_volume(
     volume_id: str,
     request: AttachVolumeRequest,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """Attach volume to VM.
@@ -190,6 +222,7 @@ async def attach_volume(
 @router.post("/{volume_id}/detach", response_model=SuccessResponse[VolumeResponse])
 async def detach_volume(
     volume_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """Detach volume from VM.
@@ -215,6 +248,7 @@ async def detach_volume(
 @router.delete("/{volume_id}", status_code=204)
 async def delete_volume(
     volume_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> None:
     """Delete a volume.
@@ -235,6 +269,7 @@ async def delete_volume(
 @snapshot_router.post("", response_model=SuccessResponse[SnapshotResponse], status_code=201)
 async def create_snapshot(
     request: CreateSnapshotRequest,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """Create a volume snapshot.
@@ -265,6 +300,7 @@ async def create_snapshot(
 @snapshot_router.get("/{snapshot_id}", response_model=SuccessResponse[SnapshotResponse])
 async def get_snapshot(
     snapshot_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """Get snapshot by ID.
@@ -290,6 +326,7 @@ async def get_snapshot(
 async def list_snapshots(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> dict:
     """List all snapshots with pagination.
@@ -324,6 +361,7 @@ async def list_snapshots(
 @snapshot_router.delete("/{snapshot_id}", status_code=204)
 async def delete_snapshot(
     snapshot_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VolumeService = Depends(get_volume_service),
 ) -> None:
     """Delete a snapshot.

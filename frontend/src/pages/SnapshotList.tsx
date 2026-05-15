@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react"
 import type { components } from "@/types/api"
 import { volumeService } from "@/services/volumeService"
+import { useCloudStore } from "@/stores/cloudStore"
+import { LoadingSpinner } from "@/components/common/LoadingSpinner"
+import { ErrorAlert } from "@/components/common/ErrorAlert"
 
 type SnapshotResponse = components["schemas"]["SnapshotResponse"]
 type CreateSnapshotRequest = components["schemas"]["CreateSnapshotRequest"]
-import { LoadingSpinner } from "@/components/common/LoadingSpinner"
-import { ErrorAlert } from "@/components/common/ErrorAlert"
 
 interface FormData {
   volume_id: string
@@ -14,6 +15,7 @@ interface FormData {
 }
 
 export const SnapshotList: React.FC = () => {
+  const { activeCloud, activeClouds } = useCloudStore()
   const [snapshots, setSnapshots] = useState<SnapshotResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -27,22 +29,26 @@ export const SnapshotList: React.FC = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
-    loadSnapshots()
-  }, [])
+   const loadSnapshots = async (cloud: string) => {
+     try {
+       setLoading(true)
+       setSnapshots([]); // Clear old data immediately when cloud changes
+       setError(null)
+       const response = await volumeService.listSnapshots(100, 0, cloud)
+       setSnapshots(response.data.items || [])
+     } catch (err) {
+       setError(err instanceof Error ? err.message : "Failed to load snapshots")
+     } finally {
+       setLoading(false)
+     }
+   }
 
-  const loadSnapshots = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await volumeService.listSnapshots()
-      setSnapshots(response.data.items || [])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load snapshots")
-    } finally {
-      setLoading(false)
-    }
-  }
+   useEffect(() => {
+     // Only load when we have clouds fetched and activeCloud is set
+     if (activeClouds.length > 0 && activeCloud) {
+       loadSnapshots(activeCloud)
+     }
+   }, [activeCloud, activeClouds])
 
   const handleCreateSnapshot = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,10 +69,10 @@ export const SnapshotList: React.FC = () => {
         name: formData.name,
         description: formData.description || undefined,
       }
-      await volumeService.createSnapshot(createData)
-      setShowCreateForm(false)
-      setFormData({ volume_id: "", name: "", description: "" })
-      await loadSnapshots()
+       await volumeService.createSnapshot(createData, activeCloud)
+       setShowCreateForm(false)
+       setFormData({ volume_id: "", name: "", description: "" })
+       await loadSnapshots(activeCloud)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create snapshot")
     } finally {
@@ -78,7 +84,7 @@ export const SnapshotList: React.FC = () => {
     try {
       setDeletingIds(new Set([...deletingIds, snapshotId]))
       setError(null)
-      await volumeService.deleteSnapshot(snapshotId)
+      await volumeService.deleteSnapshot(snapshotId, activeCloud)
       setSnapshots(snapshots.filter((s) => s.id !== snapshotId))
       setDeleteConfirm(null)
     } catch (err) {

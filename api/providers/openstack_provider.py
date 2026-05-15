@@ -38,7 +38,15 @@ class OpenStackProvider(BaseProvider):
         try:
             self.engine = OpenStackEngine(cloud_name=cloud_name)
         except Exception as e:
-            raise CloudConnectionError(cloud_name or "default", str(e))
+            error_msg = str(e)
+            # Provide helpful error messages for common issues
+            if "YOUR_" in error_msg or "Unauthorized" in error_msg or "401" in error_msg:
+                error_msg = (
+                    f"OpenStack cloud '{cloud_name}' authentication failed. "
+                    "Please ensure credentials are configured correctly in clouds.yaml. "
+                    "Check your application_credential_secret, password, or auth tokens."
+                )
+            raise CloudConnectionError(cloud_name or "default", error_msg)
 
     async def check_connection(self) -> bool:
         """Check if connected to OpenStack cloud."""
@@ -187,7 +195,12 @@ class OpenStackProvider(BaseProvider):
         """List VMs from OpenStack."""
         try:
             compute = self.engine.get_compute()
-            servers = list(compute.servers(limit=limit, marker=offset))
+            # Only use marker if offset is not 0 (OpenStack quirk)
+            if offset > 0:
+                servers = list(compute.servers(limit=limit, marker=offset))
+            else:
+                servers = list(compute.servers(limit=limit))
+            
             # Get total count (this is approximate)
             total = len(servers) + offset
             return [self._vm_from_os(s) for s in servers], total
@@ -273,7 +286,7 @@ class OpenStackProvider(BaseProvider):
     ) -> Volume:
         """Create a new volume on OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
+            block_storage = self.engine.get_volume()
             volume = block_storage.create_volume(
                 name=name,
                 size=size_gb,
@@ -289,7 +302,7 @@ class OpenStackProvider(BaseProvider):
     async def get_volume(self, volume_id: str) -> Volume:
         """Get volume from OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
+            block_storage = self.engine.get_volume()
             volume = block_storage.get_volume(volume_id)
             if not volume:
                 raise NotFoundError("Volume", volume_id)
@@ -302,8 +315,13 @@ class OpenStackProvider(BaseProvider):
     async def list_volumes(self, limit: int = 100, offset: int = 0) -> tuple[List[Volume], int]:
         """List volumes from OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
-            volumes = list(block_storage.volumes(limit=limit, marker=offset))
+            block_storage = self.engine.get_volume()
+            # Only use marker if offset is not 0 (OpenStack quirk)
+            if offset > 0:
+                volumes = list(block_storage.volumes(limit=limit, marker=offset))
+            else:
+                volumes = list(block_storage.volumes(limit=limit))
+            
             total = len(volumes) + offset
             return [self._volume_from_os(v) for v in volumes], total
         except Exception as e:
@@ -312,7 +330,7 @@ class OpenStackProvider(BaseProvider):
     async def delete_volume(self, volume_id: str) -> bool:
         """Delete volume from OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
+            block_storage = self.engine.get_volume()
             result = block_storage.delete_volume(volume_id, wait=False)
             return result is not False
         except Exception as e:
@@ -371,7 +389,7 @@ class OpenStackProvider(BaseProvider):
     ) -> Snapshot:
         """Create a snapshot on OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
+            block_storage = self.engine.get_volume()
             snapshot = block_storage.create_snapshot(
                 name=name,
                 volume_id=volume_id,
@@ -386,7 +404,7 @@ class OpenStackProvider(BaseProvider):
     async def get_snapshot(self, snapshot_id: str) -> Snapshot:
         """Get snapshot from OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
+            block_storage = self.engine.get_volume()
             snapshot = block_storage.get_snapshot(snapshot_id)
             if not snapshot:
                 raise NotFoundError("Snapshot", snapshot_id)
@@ -399,8 +417,13 @@ class OpenStackProvider(BaseProvider):
     async def list_snapshots(self, limit: int = 100, offset: int = 0) -> tuple[List[Snapshot], int]:
         """List snapshots from OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
-            snapshots = list(block_storage.snapshots(limit=limit, marker=offset))
+            block_storage = self.engine.get_volume()
+            # Only use marker if offset is not 0 (OpenStack quirk)
+            if offset > 0:
+                snapshots = list(block_storage.snapshots(limit=limit, marker=offset))
+            else:
+                snapshots = list(block_storage.snapshots(limit=limit))
+            
             total = len(snapshots) + offset
             return [self._snapshot_from_os(s) for s in snapshots], total
         except Exception as e:
@@ -409,7 +432,7 @@ class OpenStackProvider(BaseProvider):
     async def delete_snapshot(self, snapshot_id: str) -> bool:
         """Delete snapshot from OpenStack."""
         try:
-            block_storage = self.engine.get_block_storage()
+            block_storage = self.engine.get_volume()
             result = block_storage.delete_snapshot(snapshot_id, wait=False)
             return result is not False
         except Exception as e:

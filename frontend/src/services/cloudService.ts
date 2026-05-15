@@ -1,11 +1,18 @@
 import { apiClient } from './api';
 
-interface CloudStatus {
+interface CloudInfo {
+  type: 'mock' | 'openstack' | 'other';
+  authenticated: boolean;
+  default?: boolean;
+  available?: boolean;
+  error?: string | null;
+}
+
+interface CloudsResponse {
   success: boolean;
-  data: {
-    clouds: string[];
-    active_cloud: string;
-  };
+  active_cloud: string;
+  clouds: Record<string, CloudInfo>;
+  message?: string;
 }
 
 interface HealthStatus {
@@ -18,7 +25,7 @@ export const cloudService = {
   /**
    * Get status of all configured clouds
    */
-  async getCloudsStatus(): Promise<CloudStatus> {
+  async getCloudsStatus(): Promise<CloudsResponse> {
     const response = await apiClient.get('/clouds');
     return response.data;
   },

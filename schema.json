@@ -14,6 +14,24 @@
         "summary": "Create Vm",
         "description": "Create a new VM.\n\nArgs:\n    request: VM creation parameters\n    service: VM service\n\nReturns:\n    Created VM response\n\nRaises:\n    ValidationError: If input is invalid\n    CloudConnectionError: If cannot connect to cloud\n    CloudOperationError: If cloud operation fails",
         "operationId": "create_vm_vms_post",
+        "parameters": [
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -77,6 +95,22 @@
               "default": 0,
               "title": "Offset"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -122,6 +156,22 @@
               "type": "string",
               "title": "Vm Id"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -163,6 +213,22 @@
               "type": "string",
               "title": "Vm Id"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -198,6 +264,22 @@
             "schema": {
               "type": "string",
               "title": "Vm Id"
+            }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
             }
           }
         ],
@@ -243,6 +325,24 @@
         "summary": "Create Volume",
         "description": "Create a new volume.\n\nArgs:\n    request: Volume creation parameters\n    service: Volume service\n\nReturns:\n    Created volume response",
         "operationId": "create_volume_volumes_post",
+        "parameters": [
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -306,6 +406,22 @@
               "default": 0,
               "title": "Offset"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -351,6 +467,22 @@
               "type": "string",
               "title": "Volume Id"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -392,6 +524,22 @@
               "type": "string",
               "title": "Volume Id"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -427,6 +575,22 @@
             "schema": {
               "type": "string",
               "title": "Volume Id"
+            }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
             }
           }
         ],
@@ -481,6 +645,22 @@
               "type": "string",
               "title": "Volume Id"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -515,6 +695,24 @@
         "summary": "Create Snapshot",
         "description": "Create a volume snapshot.\n\nArgs:\n    request: Snapshot creation parameters\n    service: Volume service\n\nReturns:\n    Created snapshot response",
         "operationId": "create_snapshot_snapshots_post",
+        "parameters": [
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -578,6 +776,22 @@
               "default": 0,
               "title": "Offset"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -623,6 +837,22 @@
               "type": "string",
               "title": "Snapshot Id"
             }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
+            }
           }
         ],
         "responses": {
@@ -663,6 +893,22 @@
             "schema": {
               "type": "string",
               "title": "Snapshot Id"
+            }
+          },
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cloud"
             }
           }
         ],
@@ -728,6 +974,44 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/cloud/{cloud_name}": {
+      "get": {
+        "summary": "Cloud Health Check",
+        "description": "Check if a specific cloud can be connected to.\n\nThis endpoint tests the actual connection to a cloud provider\nto ensure credentials are valid and the service is reachable.\n\nArgs:\n    cloud_name: Name of the cloud to check (e.g., 'ovh', 'mock')\n\nReturns:\n    dict: Cloud health status with connection details",
+        "operationId": "cloud_health_check_health_cloud__cloud_name__get",
+        "parameters": [
+          {
+            "name": "cloud_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Cloud Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -1403,6 +1687,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",

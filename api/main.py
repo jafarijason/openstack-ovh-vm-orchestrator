@@ -4,6 +4,19 @@ OpenStack VM Orchestrator API
 Main FastAPI application entry point for VM lifecycle management.
 """
 
+# ============================================================================
+# DEBUGPY - Attach debugger at startup
+# ============================================================================
+import debugpy
+
+port = 5162
+debugpy.listen(("localhost", port))
+print(f"\n[DEBUG] Debugpy listening on localhost:{port}")
+print(f"[DEBUG] Waiting for debugger to attach...")
+# debugpy.wait_for_client()
+print(f"[DEBUG] Debugger attached!")
+# ============================================================================
+
 import json
 import os
 from contextlib import asynccontextmanager
@@ -62,7 +75,12 @@ async def lifespan(fast_app: FastAPI):
         logger.info("Initializing infrastructure provider...")
         cloud_name = os.environ.get("OS_CLOUD")
         provider = create_provider(cloud_name=cloud_name)
-        active_cloud = cloud_name or "default"
+        
+        # Get the actual active cloud name from configuration
+        from api.core.config import get_clouds_config
+        clouds_config = get_clouds_config()
+        default_cloud = clouds_config.get_default()
+        active_cloud = cloud_name or (default_cloud.name if default_cloud else "default")
         
         # Initialize services
         vm_service = VMService(provider)
@@ -72,6 +90,7 @@ async def lifespan(fast_app: FastAPI):
         # Store in app state
         fast_app.state.vm_service = vm_service
         fast_app.state.volume_service = volume_service
+        fast_app.state.active_cloud = active_cloud
         
         # Generate OpenAPI schema
         openapi_schema = fast_app.openapi()
@@ -252,6 +271,112 @@ async def hello_world():
             "snapshots": "/snapshots",
         },
     }
+
+
+# Cloud Health Check endpoint
+@app.get("/health/cloud/{cloud_name}")
+async def cloud_health_check(cloud_name: str):
+    """
+    Check if a specific cloud can be connected to.
+    
+    This endpoint tests the actual connection to a cloud provider
+    to ensure credentials are valid and the service is reachable.
+    
+    Args:
+        cloud_name: Name of the cloud to check (e.g., 'ovh', 'mock')
+    
+    Returns:
+        dict: Cloud health status with connection details
+    """
+    try:
+        # Create provider for the cloud
+        provider = create_provider(cloud_name=cloud_name)
+        
+        # Try to check connection
+        is_connected = await provider.check_connection()
+        
+        if is_connected:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "healthy",
+                    "cloud": cloud_name,
+                    "connected": True,
+                    "message": f"Successfully connected to {cloud_name} cloud",
+                },
+            )
+        else:
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "status": "unhealthy",
+                    "cloud": cloud_name,
+                    "connected": False,
+                    "message": f"Could not verify connection to {cloud_name} cloud",
+                    "error": "Connection verification failed",
+                },
+            )
+    
+    except ImportError as e:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "cloud": cloud_name,
+                "connected": False,
+                "message": f"Cannot connect to {cloud_name} cloud",
+                "error": "Missing dependencies",
+                "details": str(e),
+                "solution": "Install required packages: pip install openstacksdk",
+            },
+        )
+    
+    except Exception as e:
+        error_str = str(e)
+        
+        # Provide specific solutions based on error type
+        solution = "Check your cloud configuration in clouds.yaml"
+        error_code = "UNKNOWN_ERROR"
+        
+        if "401" in error_str or "Unauthorized" in error_str:
+            error_code = "AUTHENTICATION_FAILED"
+            solution = "Check your credentials (username, password, application credentials)"
+        elif "domain" in error_str.lower():
+            error_code = "MISSING_DOMAIN"
+            solution = "Add domain configuration to clouds.yaml: user_domain_name or project_domain_name"
+        elif "project" in error_str.lower():
+            error_code = "INVALID_PROJECT"
+            solution = "Verify project_name in clouds.yaml is correct"
+        elif "400" in error_str or "Bad Request" in error_str:
+            error_code = "BAD_REQUEST"
+            solution = "Check auth configuration - may be missing domain, user_domain_name, or project_domain_name"
+        elif "404" in error_str or "Not Found" in error_str:
+            error_code = "SERVICE_NOT_FOUND"
+            solution = "Check auth_url in clouds.yaml and verify region_name"
+        elif "Connection" in error_str:
+            error_code = "CONNECTION_ERROR"
+            solution = "Check if OpenStack/OVH cloud is reachable at the auth_url"
+        
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "cloud": cloud_name,
+                "connected": False,
+                "message": f"Cannot connect to {cloud_name} cloud",
+                "error_code": error_code,
+                "error": error_str,
+                "solution": solution,
+                "cloud_config_file": "clouds.yaml",
+                "troubleshooting": {
+                    "step1": "Check if openstacksdk is installed: pip install openstacksdk",
+                    "step2": "Verify credentials in clouds.yaml",
+                    "step3": "Check cloud configuration: curl http://localhost:8000/clouds",
+                    "step4": "Test auth_url is reachable",
+                    "step5": "Verify user_domain_name and project_domain_name for Keystone v3",
+                },
+            },
+        )
 
 
 if __name__ == "__main__":

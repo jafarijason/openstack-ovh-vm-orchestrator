@@ -42,9 +42,22 @@ class OpenStackEngine:
             print(f"✅ Connected to OpenStack cloud: {cloud_name}")
             
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to connect to OpenStack cloud '{cloud_name}': {str(e)}"
-            ) from e
+            error_str = str(e)
+            # Provide helpful error messages for common issues
+            if "YOUR_" in error_str or any(placeholder in error_str for placeholder in ["YOUR_APPLICATION_CREDENTIAL_SECRET", "YOUR_PASSWORD"]):
+                raise RuntimeError(
+                    f"Cloud '{cloud_name}' has incomplete credentials in clouds.yaml. "
+                    "Please configure valid OpenStack credentials."
+                ) from e
+            elif "Unauthorized" in error_str or "401" in error_str:
+                raise RuntimeError(
+                    f"Authentication failed for cloud '{cloud_name}'. "
+                    "Check your credentials in clouds.yaml are correct."
+                ) from e
+            else:
+                raise RuntimeError(
+                    f"Failed to connect to OpenStack cloud '{cloud_name}': {error_str}"
+                ) from e
 
     def get_connection(self):
         """

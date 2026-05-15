@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react"
 import type { components } from "@/types/api"
 import { volumeService } from "@/services/volumeService"
+import { useCloudStore } from "@/stores/cloudStore"
+import { LoadingSpinner } from "@/components/common/LoadingSpinner"
+import { ErrorAlert } from "@/components/common/ErrorAlert"
 
 type VolumeResponse = components["schemas"]["VolumeResponse"]
 type CreateVolumeRequest = components["schemas"]["CreateVolumeRequest"]
-import { LoadingSpinner } from "@/components/common/LoadingSpinner"
-import { ErrorAlert } from "@/components/common/ErrorAlert"
 
 interface FormData {
   name: string
@@ -14,6 +15,7 @@ interface FormData {
 }
 
 export const VolumeList: React.FC = () => {
+  const { activeCloud, activeClouds } = useCloudStore()
   const [volumes, setVolumes] = useState<VolumeResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -27,22 +29,26 @@ export const VolumeList: React.FC = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
-    loadVolumes()
-  }, [])
+   const loadVolumes = async (cloud: string) => {
+     try {
+       setLoading(true)
+       setVolumes([]); // Clear old data immediately when cloud changes
+       setError(null)
+       const response = await volumeService.listVolumes(100, 0, cloud)
+       setVolumes(response.data.items || [])
+     } catch (err) {
+       setError(err instanceof Error ? err.message : "Failed to load volumes")
+     } finally {
+       setLoading(false)
+     }
+   }
 
-  const loadVolumes = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await volumeService.listVolumes()
-      setVolumes(response.data.items || [])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load volumes")
-    } finally {
-      setLoading(false)
-    }
-  }
+   useEffect(() => {
+     // Only load when we have clouds fetched and activeCloud is set
+     if (activeClouds.length > 0 && activeCloud) {
+       loadVolumes(activeCloud)
+     }
+   }, [activeCloud, activeClouds])
 
   const handleCreateVolume = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,10 +69,10 @@ export const VolumeList: React.FC = () => {
         size_gb: formData.size,
         description: formData.description || undefined,
       }
-      await volumeService.createVolume(createData)
-      setShowCreateForm(false)
-      setFormData({ name: "", size: 10, description: "" })
-      await loadVolumes()
+       await volumeService.createVolume(createData, activeCloud)
+       setShowCreateForm(false)
+       setFormData({ name: "", size: 10, description: "" })
+       await loadVolumes(activeCloud)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create volume")
     } finally {
@@ -78,7 +84,7 @@ export const VolumeList: React.FC = () => {
     try {
       setDeletingIds(new Set([...deletingIds, volumeId]))
       setError(null)
-      await volumeService.deleteVolume(volumeId)
+      await volumeService.deleteVolume(volumeId, activeCloud)
       setVolumes(volumes.filter((v) => v.id !== volumeId))
       setDeleteConfirm(null)
     } catch (err) {

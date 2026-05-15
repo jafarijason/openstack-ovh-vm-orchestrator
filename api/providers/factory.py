@@ -78,12 +78,24 @@ def list_available_clouds() -> dict:
     for name, cloud_config in clouds_config.list().items():
         provider_type = "mock" if cloud_config.is_mock() else "openstack"
         has_auth = cloud_config.has_auth()
+        is_available = True
+        error_message = None
+        
+        # Check if credentials have placeholders (incomplete)
+        if not cloud_config.is_mock() and has_auth:
+            auth = cloud_config.config.get("auth", {})
+            auth_str = str(auth)
+            if "YOUR_" in auth_str:
+                is_available = False
+                error_message = "Credentials incomplete - contains placeholders (YOUR_*)"
+        
+        default_cloud = clouds_config.get_default()
         result[name] = {
             "type": provider_type,
             "authenticated": has_auth,
-            "default": name == clouds_config.get_default().name
-            if clouds_config.get_default()
-            else False,
+            "available": is_available,
+            "error": error_message,
+            "default": name == default_cloud.name if default_cloud else False,
         }
 
     return result

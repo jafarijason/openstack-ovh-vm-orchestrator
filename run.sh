@@ -4,11 +4,17 @@
 
 set -e
 
+# Use asdf Python if available, otherwise fall back to python3
+PYTHON_CMD="python"
+if command -v asdf &> /dev/null; then
+    PYTHON_CMD="$(asdf which python)"
+fi
+
 echo "🚀 Starting OpenStack VM Orchestrator API..."
 echo ""
 echo "📦 Environment:"
-echo "   Python: $(python --version 2>&1)"
-echo "   FastAPI: $(python -c 'import fastapi; print(fastapi.__version__)')"
+echo "   Python: $($PYTHON_CMD --version 2>&1)"
+echo "   FastAPI: $($PYTHON_CMD -c 'import fastapi; print(fastapi.__version__)')"
 echo ""
 
 # Check if virtual environment is activated
@@ -25,4 +31,4 @@ echo "   - Swagger UI: http://localhost:8000/docs"
 echo "   - ReDoc: http://localhost:8000/redoc"
 echo ""
 
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+$PYTHON_CMD -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000

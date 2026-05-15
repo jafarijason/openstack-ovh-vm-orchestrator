@@ -1,6 +1,7 @@
 """VM API routes."""
 
 from datetime import datetime
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from api.api.schemas.common import SuccessResponse, ErrorResponse
 from api.api.schemas.vm import (
@@ -13,16 +14,43 @@ from api.api.schemas.vm import (
 from api.services.vm_service import VMService
 from api.core.exceptions import OrchestratorException
 from api.core.models import VM
+from api.providers.factory import create_provider
 
 router = APIRouter(prefix="/vms", tags=["VMs"])
 
 
-def get_vm_service(request: Request) -> VMService:
-    """Get VM service instance from app state."""
-    service = request.app.state.vm_service
-    if service is None:
-        raise RuntimeError("VM service not initialized")
-    return service
+def get_vm_service(request: Request, cloud: Optional[str] = Query(None)) -> VMService:
+    """Get VM service instance from app state or create for specified cloud.
+    
+    Args:
+        request: FastAPI request object
+        cloud: Optional cloud name to use. If not provided, uses default cloud.
+    
+    Returns:
+        VMService instance
+    """
+    try:
+        # Get the active cloud from app state
+        active_cloud = getattr(request.app.state, 'active_cloud', None)
+        
+        # If cloud param matches active cloud, use the pre-initialized service from app state
+        if cloud and cloud == active_cloud:
+            service = request.app.state.vm_service
+            if service is None:
+                raise RuntimeError("VM service not initialized")
+            return service
+        elif cloud:
+            # Create provider for specified cloud
+            provider = create_provider(cloud_name=cloud)
+            return VMService(provider)
+        else:
+            # Use default service from app state
+            service = request.app.state.vm_service
+            if service is None:
+                raise RuntimeError("VM service not initialized")
+            return service
+    except Exception as e:
+        raise HTTPException(status_code=400, detail={"code": "INVALID_CLOUD", "message": str(e)})
 
 
 def vm_to_response(vm: VM) -> VMResponse:
@@ -46,6 +74,7 @@ def vm_to_response(vm: VM) -> VMResponse:
 @router.post("", response_model=SuccessResponse[VMResponse], status_code=201)
 async def create_vm(
     request: CreateVMRequest,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VMService = Depends(get_vm_service),
 ) -> dict:
     """Create a new VM.
@@ -84,6 +113,7 @@ async def create_vm(
 @router.get("/{vm_id}", response_model=SuccessResponse[VMResponse])
 async def get_vm(
     vm_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VMService = Depends(get_vm_service),
 ) -> dict:
     """Get VM by ID.
@@ -112,6 +142,7 @@ async def get_vm(
 async def list_vms(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VMService = Depends(get_vm_service),
 ) -> dict:
     """List all VMs with pagination.
@@ -146,6 +177,7 @@ async def list_vms(
 @router.delete("/{vm_id}", status_code=204)
 async def delete_vm(
     vm_id: str,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VMService = Depends(get_vm_service),
 ) -> None:
     """Delete a VM.
@@ -169,6 +201,7 @@ async def delete_vm(
 async def perform_vm_action(
     vm_id: str,
     request: VMActionRequest,
+    cloud: Optional[str] = Query(None, description="Cloud name to use for this operation"),
     service: VMService = Depends(get_vm_service),
 ) -> dict:
     """Perform action on VM (start, stop, reboot).

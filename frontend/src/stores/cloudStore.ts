@@ -1,10 +1,14 @@
 import { create } from 'zustand';
 import { cloudService } from '../services/cloudService';
 
+const STORAGE_KEY = 'orchestrator_selected_cloud';
+
 export interface Cloud {
   name: string;
   type: 'mock' | 'openstack' | 'other';
   authenticated: boolean;
+  available?: boolean;
+  error?: string | null;
 }
 
 interface CloudState {
@@ -24,7 +28,26 @@ interface CloudState {
   setError: (error: string | null) => void;
   clearError: () => void;
   switchCloud: (cloudName: string) => void;
+  loadPersistedCloud: () => void;
 }
+
+// Helper functions for localStorage
+const saveCloudToStorage = (cloudName: string) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, cloudName);
+  } catch (e) {
+    console.warn('Failed to save cloud to localStorage:', e);
+  }
+};
+
+const loadCloudFromStorage = (): string | null => {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch (e) {
+    console.warn('Failed to load cloud from localStorage:', e);
+    return null;
+  }
+};
 
 export const useCloudStore = create<CloudState>((set) => ({
   activeClouds: [],
@@ -38,16 +61,23 @@ export const useCloudStore = create<CloudState>((set) => ({
     try {
       const response = await cloudService.getCloudsStatus();
       // Convert clouds object to array format
-      const cloudsArray: Cloud[] = Object.entries(response.data.clouds || {}).map(
-        ([name, info]: [string, any]) => ({
+      const cloudsArray: Cloud[] = Object.entries(response.clouds || {}).map(
+        ([name, info]) => ({
           name,
           type: info.type || 'other',
           authenticated: info.authenticated || false,
+          available: info.available !== false, // Default to true if not specified
+          error: info.error || null,
         })
       );
+      
+      // Get persisted cloud or use server's active cloud
+      const persistedCloud = loadCloudFromStorage();
+      const activeCloud = persistedCloud || response.active_cloud;
+      
       set({
         activeClouds: cloudsArray,
-        activeCloud: response.data.active_cloud,
+        activeCloud,
         loading: false,
       });
     } catch (error) {
@@ -69,7 +99,16 @@ export const useCloudStore = create<CloudState>((set) => ({
   },
 
   switchCloud: (cloudName: string) => {
+    // Save to localStorage when switching clouds
+    saveCloudToStorage(cloudName);
     set({ activeCloud: cloudName, error: null });
+  },
+
+  loadPersistedCloud: () => {
+    const persistedCloud = loadCloudFromStorage();
+    if (persistedCloud) {
+      set({ activeCloud: persistedCloud });
+    }
   },
 
   setError: (error: string | null) => {

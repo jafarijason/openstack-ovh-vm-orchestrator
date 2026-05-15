@@ -15,72 +15,84 @@ const SNAPSHOTS_PREFIX = "/snapshots"
 
 export const volumeService = {
   // Volume operations
-  async listVolumes(limit = 100, offset = 0): Promise<SuccessResponseVolume & { data: ListResponse<VolumeResponse> }> {
+  async listVolumes(limit = 100, offset = 0, cloud?: string): Promise<SuccessResponseVolume & { data: ListResponse<VolumeResponse> }> {
     const response = await apiClient.get<SuccessResponseVolume>(
-      `${API_PREFIX}?limit=${limit}&offset=${offset}`
+      `${API_PREFIX}`,
+      { params: { limit, offset, cloud } }
     )
     return response.data as any
   },
 
-  async getVolume(volumeId: string): Promise<SuccessResponseVolume> {
+  async getVolume(volumeId: string, cloud?: string): Promise<SuccessResponseVolume> {
     const response = await apiClient.get<SuccessResponseVolume>(
-      `${API_PREFIX}/${volumeId}`
+      `${API_PREFIX}/${volumeId}`,
+      { params: { cloud } }
     )
     return response.data
   },
 
-  async createVolume(data: CreateVolumeRequest): Promise<SuccessResponseVolume> {
+  async createVolume(data: CreateVolumeRequest, cloud?: string): Promise<SuccessResponseVolume> {
     const response = await apiClient.post<SuccessResponseVolume>(
       API_PREFIX,
-      data
+      data,
+      { params: { cloud } }
     )
     return response.data
   },
 
-  async deleteVolume(volumeId: string): Promise<void> {
-    await apiClient.delete(`${API_PREFIX}/${volumeId}`)
+  async deleteVolume(volumeId: string, cloud?: string): Promise<void> {
+    await apiClient.delete(`${API_PREFIX}/${volumeId}`, {
+      params: { cloud },
+    })
   },
 
-  async attachVolume(volumeId: string, vmId: string): Promise<SuccessResponseVolume> {
+  async attachVolume(volumeId: string, vmId: string, cloud?: string): Promise<SuccessResponseVolume> {
     const response = await apiClient.post<SuccessResponseVolume>(
       `${API_PREFIX}/${volumeId}/attach`,
-      { vm_id: vmId } as AttachVolumeRequest
+      { vm_id: vmId } as AttachVolumeRequest,
+      { params: { cloud } }
     )
     return response.data
   },
 
-  async detachVolume(volumeId: string): Promise<SuccessResponseVolume> {
+  async detachVolume(volumeId: string, cloud?: string): Promise<SuccessResponseVolume> {
     const response = await apiClient.post<SuccessResponseVolume>(
       `${API_PREFIX}/${volumeId}/detach`,
-      {}
+      {},
+      { params: { cloud } }
     )
     return response.data
   },
 
   // Snapshot operations
-  async listSnapshots(limit = 100, offset = 0): Promise<SuccessResponseSnapshot & { data: ListResponse<SnapshotResponse> }> {
+  async listSnapshots(limit = 100, offset = 0, cloud?: string): Promise<SuccessResponseSnapshot & { data: ListResponse<SnapshotResponse> }> {
     const response = await apiClient.get<SuccessResponseSnapshot>(
-      `${SNAPSHOTS_PREFIX}?limit=${limit}&offset=${offset}`
+      `${SNAPSHOTS_PREFIX}`,
+      { params: { limit, offset, cloud } }
     )
     return response.data as any
   },
 
-  async getSnapshot(snapshotId: string): Promise<SuccessResponseSnapshot> {
+  async getSnapshot(snapshotId: string, cloud?: string): Promise<SuccessResponseSnapshot> {
     const response = await apiClient.get<SuccessResponseSnapshot>(
-      `${SNAPSHOTS_PREFIX}/${snapshotId}`
+      `${SNAPSHOTS_PREFIX}/${snapshotId}`,
+      { params: { cloud } }
     )
     return response.data
   },
 
-  async createSnapshot(data: CreateSnapshotRequest): Promise<SuccessResponseSnapshot> {
+  async createSnapshot(data: CreateSnapshotRequest, cloud?: string): Promise<SuccessResponseSnapshot> {
     const response = await apiClient.post<SuccessResponseSnapshot>(
       SNAPSHOTS_PREFIX,
-      data
+      data,
+      { params: { cloud } }
     )
     return response.data
   },
 
-  async deleteSnapshot(snapshotId: string): Promise<void> {
-    await apiClient.delete(`${SNAPSHOTS_PREFIX}/${snapshotId}`)
+  async deleteSnapshot(snapshotId: string, cloud?: string): Promise<void> {
+    await apiClient.delete(`${SNAPSHOTS_PREFIX}/${snapshotId}`, {
+      params: { cloud },
+    })
   },
 }

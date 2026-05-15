@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { vmService } from '../services/vmService';
+import { useCloudStore } from '../stores/cloudStore';
 import { LoadingSpinner } from '../components/common/LoadingSpinner';
 import { ErrorAlert } from '../components/common/ErrorAlert';
 import type { components } from '../types/api';
@@ -14,6 +15,7 @@ interface CreateModalState {
 }
 
 export const VmList: React.FC = () => {
+  const { activeCloud, activeClouds } = useCloudStore();
   const [vms, setVms] = useState<VMResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,23 +33,27 @@ export const VmList: React.FC = () => {
     errors: {},
   });
 
-  useEffect(() => {
-    loadVMs();
-  }, []);
+   const loadVMs = async (cloud: string) => {
+     try {
+       setLoading(true);
+       setVms([]); // Clear old data immediately when cloud changes
+       const response = await vmService.listVMs(100, 0, cloud);
+       setVms(response.data);
+       setError(null);
+     } catch (err) {
+       const errorMessage = err instanceof Error ? err.message : 'Failed to load VMs';
+       setError(errorMessage);
+     } finally {
+       setLoading(false);
+     }
+   };
 
-  const loadVMs = async () => {
-    try {
-      setLoading(true);
-      const response = await vmService.listVMs(100, 0);
-      setVms(response.data);
-      setError(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load VMs';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    // Only load when we have clouds fetched and activeCloud is set
+    if (activeClouds.length > 0 && activeCloud) {
+      loadVMs(activeCloud);
     }
-  };
+  }, [activeCloud, activeClouds]);
 
   const handleCreateVM = async () => {
     const errors: Record<string, string> = {};
@@ -75,21 +81,21 @@ export const VmList: React.FC = () => {
 
     try {
       setLoading(true);
-      await vmService.createVM(createModal.formData as CreateVMRequest);
-      setCreateModal({
-        isOpen: false,
-        formData: {
-          name: '',
-          image_id: '',
-          flavor_id: '',
-          network_ids: [],
-          key_name: '',
-          security_groups: [],
-        },
-        errors: {},
-      });
-      await loadVMs();
-      setError(null);
+       await vmService.createVM(createModal.formData as CreateVMRequest, activeCloud);
+       setCreateModal({
+         isOpen: false,
+         formData: {
+           name: '',
+           image_id: '',
+           flavor_id: '',
+           network_ids: [],
+           key_name: '',
+           security_groups: [],
+         },
+         errors: {},
+       });
+       await loadVMs(activeCloud);
+       setError(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create VM';
       setError(errorMessage);
@@ -108,7 +114,7 @@ export const VmList: React.FC = () => {
         ...prev,
         [`delete-${vmId}`]: true,
       }));
-      await vmService.deleteVM(vmId);
+      await vmService.deleteVM(vmId, activeCloud);
       setVms((prev) => prev.filter((vm) => vm.id !== vmId));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete VM';
@@ -131,8 +137,8 @@ export const VmList: React.FC = () => {
         [`${action}-${vmId}`]: true,
       }));
 
-      await vmService.performVMAction(vmId, action);
-      await loadVMs(); // Reload to get updated status
+       await vmService.performVMAction(vmId, action, activeCloud);
+       await loadVMs(activeCloud); // Reload to get updated status
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : `Failed to ${action} VM`;
       setError(errorMessage);
