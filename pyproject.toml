@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
-    {name = "Jason Afari", email = "jason@example.com"}
+    {name = "Jason Jafari", email = "jason@example.com"}
 ]
 keywords = ["openstack", "orchestrator", "vm", "rest-api", "fastapi"]
 classifiers = [

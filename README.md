@@ -732,4 +732,4 @@ MIT License - See LICENSE file for details
 
 - **Repository**: [GitHub](https://github.com/jafarijason/openstack-ovh-vm-orchestrator)
 - **Issues**: [Bug reports and feature requests](https://github.com/jafarijason/openstack-ovh-vm-orchestrator/issues)
-- **Author**: Jason Afari
+- **Author**: Jason Jafari
