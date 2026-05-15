@@ -13,6 +13,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.api.routes.vm import router as vm_router
 from api.api.routes.volume import router as volume_router, snapshot_router
@@ -116,6 +117,21 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url=None,  # Disable ReDoc
     openapi_url="/openapi.json",
+)
+
+
+# Add CORS middleware to allow frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",      # Vite dev server
+        "http://localhost:3000",      # Alternative dev port
+        "http://127.0.0.1:5173",      # localhost alternative
+        "http://127.0.0.1:3000",      # localhost alternative
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
