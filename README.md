@@ -1,5 +1,10 @@
 # OpenStack VM Orchestrator
 
+[![Tests](https://github.com/jafarijason/openstack-ovh-vm-orchestrator/actions/workflows/tests.yml/badge.svg)](https://github.com/jafarijason/openstack-ovh-vm-orchestrator/actions/workflows/tests.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/fastapi-0.136+-green.svg)](https://fastapi.tiangolo.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **REST API for managing OpenStack VM lifecycle operations using FastAPI and OpenStack SDK.**
 
 An interview assignment proof-of-concept demonstrating clean architecture, API design, Python development fundamentals, and platform engineering thinking.
