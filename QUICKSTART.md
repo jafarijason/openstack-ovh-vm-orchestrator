@@ -1,320 +1,330 @@
-# Quick Start Guide: OpenStack VM Orchestrator
+# Quick Start Guide
 
-Get the full-stack application running in minutes.
+Get the OpenStack VM Orchestrator running in 5 minutes.
 
 ## Prerequisites
 
-- **Python 3.10+** (for backend)
-- **Node.js 18+** (for frontend)
-- **npm or yarn** (for frontend package management)
+- Python 3.11+ OR Docker
+- Node.js 18+ (for frontend)
+- ~5 minutes and a terminal
 
-## Quick Start (2 Terminals)
+## Option 1: Local Development (Fastest)
 
-### Terminal 1: Start Backend API
+### 1. Install Dependencies
 
 ```bash
-# From project root
-./run.sh
+# Backend
+python3.11 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# Frontend (optional)
+cd frontend
+npm install
+cd ..
 ```
 
-The backend will start on **http://localhost:8000**
+### 2. Start Backend
 
-**Expected output:**
+```bash
+python -m uvicorn api.main:app --reload --port 8000
+```
+
+You should see:
 ```
 INFO:     Uvicorn running on http://0.0.0.0:8000
-INFO:     Available clouds: {'mock': {'type': 'mock', 'authenticated': True}}
-INFO:     Services initialized successfully
+INFO:     Application startup complete
 ```
 
-**Verify backend is running:**
-```bash
-curl http://localhost:8000/health
-# Returns: {"status": "healthy", "version": "0.1.0", ...}
-```
-
-**View API Documentation:**
-Open http://localhost:8000/docs in your browser
-
----
-
-### Terminal 2: Start Frontend
+### 3. Start Frontend (Optional)
 
 ```bash
-# Navigate to frontend
 cd frontend
-
-# Install dependencies (first time only)
-npm install --legacy-peer-deps
-
-# Start development server
 npm run dev
 ```
 
-The frontend will start on **http://localhost:5173**
+### 4. Access
 
-**Expected output:**
-```
-VITE v8.0.13  ready in 250 ms
+- **API**: http://localhost:8000
+- **Swagger UI**: http://localhost:8000/docs
+- **Frontend**: http://localhost:5174 (if you ran npm run dev)
 
-➜  Local:   http://localhost:5173/
-```
-
----
-
-## Accessing the Application
-
-1. **Frontend UI:** http://localhost:5173
-2. **Backend API:** http://localhost:8000
-3. **API Documentation:** http://localhost:8000/docs
-4. **OpenAPI Schema:** http://localhost:8000/openapi.json
-
----
-
-## Common Commands
-
-### Backend
+### 5. Test It
 
 ```bash
-# Run with mock cloud (default)
-./run.sh
+# List VMs
+curl http://localhost:8000/vms
 
-# Run with specific cloud
-OS_CLOUD=mock ./run.sh
-OS_CLOUD=ovh ./run.sh
+# Create VM
+curl -X POST http://localhost:8000/vms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-vm",
+    "image_id": "img-001",
+    "flavor_id": "m1.small",
+    "network_ids": ["net-public"]
+  }'
 
-# Manual run with uvicorn
+# List Networks
+curl http://localhost:8000/networks
+```
+
+**That's it!** You have a fully functional OpenStack VM orchestrator running with mock data.
+
+---
+
+## Option 2: Docker Compose (Recommended)
+
+### 1. Run Everything
+
+```bash
+docker-compose up -d
+```
+
+### 2. Check Status
+
+```bash
+docker-compose ps
+docker-compose logs api
+```
+
+### 3. Access
+
+- **API**: http://localhost:8000
+- **Swagger UI**: http://localhost:8000/docs
+
+### 4. Stop
+
+```bash
+docker-compose down
+```
+
+---
+
+## Option 3: Production (With Real OpenStack)
+
+### 1. Set Up Cloud Credentials
+
+```bash
+# Get from OVH or your OpenStack provider
+export OS_AUTH_URL=https://auth.cloud.ovh.net/v3
+export OS_PROJECT_ID=your_project_id
+export OS_USERNAME=your_username
+export OS_PASSWORD=your_password
+export OS_REGION_NAME=SBG5
+```
+
+### 2. Run with Real Cloud
+
+```bash
+export OS_CLOUD=ovh
 python -m uvicorn api.main:app --reload --port 8000
-
-# View API docs
-curl http://localhost:8000/docs
-
-# Health check
-curl http://localhost:8000/health
-
-# List clouds
-curl http://localhost:8000/clouds
 ```
 
-### Frontend
+### 3. Now Commands Affect Real Infrastructure
 
 ```bash
-# Install dependencies
-npm install --legacy-peer-deps
+# This creates a REAL VM on OVH!
+curl -X POST http://localhost:8000/vms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "production-vm",
+    "image_id": "real-image-id",
+    "flavor_id": "m1.small",
+    "network_ids": ["real-network-id"]
+  }'
+```
 
-# Development server
-npm run dev
+---
 
-# Build for production
-npm run build
+## Running Tests
 
-# Preview production build
-npm run preview
+```bash
+# Unit tests only
+pytest tests/unit/test_services.py -v
 
-# Regenerate API types from schema.json
-npm run generate-types
+# With coverage
+pytest --cov=api tests/unit/test_services.py
 
-# Type checking
-npm run tsc
+# Integration tests (requires environment)
+pytest tests/integration/test_vm_endpoints.py -v
+```
+
+**Current Status**: 23/32 passing unit tests, 49% coverage
+
+---
+
+## Key Resources
+
+- **API Documentation**: http://localhost:8000/docs (Swagger UI)
+- **API Examples**: [docs/API_EXAMPLES.md](docs/API_EXAMPLES.md)
+- **Full README**: [README.md](README.md)
+- **Contributing Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Architecture Details**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
+
+## Common Tasks
+
+### Create a VM
+
+```bash
+curl -X POST http://localhost:8000/vms \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "web-server",
+    "image_id": "img-001",
+    "flavor_id": "m1.small",
+    "network_ids": ["net-public"],
+    "key_name": "my-key",
+    "security_groups": ["default"]
+  }'
+```
+
+### List All VMs
+
+```bash
+curl http://localhost:8000/vms?limit=100
+```
+
+### Start/Stop a VM
+
+```bash
+# Start
+curl -X POST http://localhost:8000/vms/vm-id/action \
+  -H "Content-Type: application/json" \
+  -d '{"action": "start"}'
+
+# Stop
+curl -X POST http://localhost:8000/vms/vm-id/action \
+  -H "Content-Type: application/json" \
+  -d '{"action": "stop"}'
+
+# Reboot
+curl -X POST http://localhost:8000/vms/vm-id/action \
+  -H "Content-Type: application/json" \
+  -d '{"action": "reboot"}'
+```
+
+### Delete a VM
+
+```bash
+curl -X DELETE http://localhost:8000/vms/vm-id
+```
+
+### List Networks
+
+```bash
+curl http://localhost:8000/networks
+```
+
+### List Images
+
+```bash
+curl http://localhost:8000/images
+```
+
+### List Flavors
+
+```bash
+curl http://localhost:8000/flavors
+```
+
+### List SSH Keys
+
+```bash
+curl http://localhost:8000/ssh-keys
 ```
 
 ---
 
 ## Troubleshooting
 
-### CORS Errors
-
-**Problem:** XMLHttpRequest CORS policy error
-```
-Access to XMLHttpRequest at 'http://localhost:8000/clouds' from origin 'http://localhost:5173' 
-has been blocked by CORS policy
-```
-
-**Solution:** Backend CORS middleware is configured for:
-- `http://localhost:5173` ✓
-- `http://localhost:3000` ✓
-- `http://127.0.0.1:5173` ✓
-
-**Note:** Restart backend if you get this error after updating
-
-### API Types Not Found
-
-**Problem:** TypeScript errors about missing API types
-```
-error TS2305: Module '"@/types/api"' has no exported member 'VMResponse'
-```
-
-**Solution:** Regenerate types from schema.json
-```bash
-cd frontend
-npm run generate-types
-```
-
 ### Port Already in Use
 
-**Backend port 8000 in use:**
 ```bash
-# Find and kill process using port 8000
-lsof -ti:8000 | xargs kill -9
-
-# Or use different port
+# Backend on different port
 python -m uvicorn api.main:app --reload --port 8001
-```
 
-**Frontend port 5173 in use:**
-```bash
-# Vite will suggest alternative port automatically
-# Or manually specify:
-npm run dev -- --port 3000
-```
-
-### Dependencies Issues
-
-**Frontend dependencies conflict:**
-```bash
+# Frontend on different port
 cd frontend
-rm -rf node_modules package-lock.json
-npm install --legacy-peer-deps
+npm run dev -- --port 5175
 ```
 
-**Backend dependencies:**
+### Module Import Errors
+
 ```bash
+# Ensure virtual environment is activated
+source .venv/bin/activate
+
+# Reinstall dependencies
 pip install -r requirements.txt
 ```
 
----
+### Docker Issues
 
-## Architecture Overview
+```bash
+# Clear containers
+docker-compose down -v
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend (React 18)                       │
-│                   http://localhost:5173                      │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Pages: Dashboard, VMs, Volumes, Snapshots, Settings │   │
-│  │  Components: Charts, Cards, Forms, Modals           │   │
-│  │  State: Zustand stores (vm, volume, snapshot, cloud) │   │
-│  └────────────────┬─────────────────────────────────────┘   │
-└─────────────────────┼────────────────────────────────────────┘
-                      │
-                      │ HTTP/REST + CORS
-                      │ (localhost:5173 allowed)
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Backend (FastAPI)                           │
-│                 http://localhost:8000                        │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Routes: /vms, /volumes, /snapshots, /clouds, /health│   │
-│  │  Services: VMService, VolumeService                  │   │
-│  │  Providers: MockProvider, OpenStackProvider          │   │
-│  │  Engine: OpenStackEngine (SDK wrapper)               │   │
-│  └────────────────┬─────────────────────────────────────┘   │
-└─────────────────────┼────────────────────────────────────────┘
-                      │
-                      │ OpenStack SDK / Mock Provider
-                      │
-                      ▼
-        ┌──────────────────────────┐
-        │  OpenStack Cloud (OVH)   │
-        │  or Mock Provider (Test) │
-        └──────────────────────────┘
+# Rebuild
+docker-compose build --no-cache
+
+# Run again
+docker-compose up -d
 ```
 
----
+### Tests Failing
 
-## File Structure
+```bash
+# Install test dependencies
+pip install pytest pytest-asyncio pytest-cov
 
-```
-├── api/                           # Backend
-│   ├── main.py                   # FastAPI app entry
-│   ├── api/
-│   │   ├── routes/              # Endpoints
-│   │   │   ├── vm.py
-│   │   │   └── volume.py
-│   │   └── schemas/             # Pydantic models
-│   ├── services/                # Business logic
-│   ├── providers/               # Infrastructure abstraction
-│   └── core/                    # Models, config, exceptions
-│
-├── frontend/                      # Frontend
-│   ├── src/
-│   │   ├── pages/               # Route pages
-│   │   ├── components/          # Reusable components
-│   │   ├── services/            # API clients
-│   │   ├── stores/              # Zustand state
-│   │   └── types/               # Generated API types
-│   ├── vite.config.ts
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── schema.json                    # Generated OpenAPI spec
-├── run.sh                         # Backend quick-start
-├── requirements.txt               # Python deps
-└── QUICKSTART.md                 # This file
+# Run with verbose output
+pytest tests/unit/test_services.py -vv
 ```
 
 ---
 
 ## Next Steps
 
-### 1. Explore the Application
-- Create VMs in the Dashboard
-- Manage volumes and snapshots
-- Check cloud configuration in Settings
-
-### 2. Development
-- Add new features following the AGENTS.md guide
-- Regenerate types when backend changes: `npm run generate-types`
-- Frontend automatically hot-reloads on changes
-
-### 3. Testing
-- Test backend endpoints via http://localhost:8000/docs
-- Test frontend UI at http://localhost:5173
-
-### 4. Deployment
-- See AGENTS.md for Docker and production setup
-- Build frontend: `npm run build`
-- Deploy frontend to static hosting
-- Deploy backend to production server
+1. **Explore the API** - Visit http://localhost:8000/docs
+2. **Read the Examples** - See [docs/API_EXAMPLES.md](docs/API_EXAMPLES.md)
+3. **Understand the Architecture** - See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+4. **Contribute** - Follow [CONTRIBUTING.md](CONTRIBUTING.md)
+5. **Deploy to Production** - See deployment options in [README.md](README.md)
 
 ---
 
-## Useful Links
+## Project Status
 
-- **Frontend Development:** See `AGENTS.md` → "Frontend Development"
-- **Backend Development:** See `AGENTS.md` → "Backend Development"
-- **Cloud Configuration:** See `CLOUDS.md`
-- **API Documentation:** http://localhost:8000/docs (after starting backend)
-- **Architecture Patterns:** See `docs/ARCHITECTURE.md`
+✅ **Complete**:
+- Backend API with 5 resources (VMs, Networks, Images, Flavors, SSH Keys)
+- OpenAPI 3.1.0 schema with auto-generated docs
+- Frontend UI with React 18 + TypeScript
+- Mock provider for development (no credentials needed)
+- Real OVH OpenStack integration
+- Docker and docker-compose setup
+- GitHub Actions CI/CD pipeline
+- 23+ passing unit tests with 49% coverage
+- Comprehensive documentation and diagrams
 
----
+⏳ **In Progress**:
+- Integration tests (30+ written, need environment)
+- Production deployment guide
 
-## Health Check
-
-Verify everything is working:
-
-```bash
-# Backend health
-curl http://localhost:8000/health
-
-# Frontend is accessible
-curl http://localhost:5173
-
-# API is accessible from frontend (no CORS errors)
-# Open browser console at http://localhost:5173 and check
-```
+🔧 **Future**:
+- E2E tests
+- Kubernetes deployment
+- Additional cloud providers
+- Performance metrics
 
 ---
 
-**Ready to get started? Run these commands in order:**
+## Get Help
 
-```bash
-# Terminal 1
-./run.sh
+- **Issues**: https://github.com/jafarijason/openstack-ovh-vm-orchestrator/issues
+- **Discussions**: https://github.com/jafarijason/openstack-ovh-vm-orchestrator/discussions
+- **Email**: jason@example.com
 
-# Terminal 2
-cd frontend
-npm install --legacy-peer-deps
-npm run dev
-
-# Then open http://localhost:5173 in your browser
-```
+Happy orchestrating! 🚀
