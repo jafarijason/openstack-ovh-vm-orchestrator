@@ -683,6 +683,23 @@
         }
       }
     },
+    "/clouds": {
+      "get": {
+        "summary": "Get Clouds Status",
+        "description": "Get status of all configured clouds.\n\nReturns:\n    dict: Available clouds and current active cloud",
+        "operationId": "get_clouds_status_clouds_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health Check",

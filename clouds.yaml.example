@@ -3,8 +3,13 @@
 # Reference: https://docs.openstack.org/openstacksdk/latest/user/config/configuration.html
 
 clouds:
+  # Mock provider - In-memory, no credentials needed (great for testing/development)
+  mock:
+    auth_type: none
+    _provider_type: mock  # Custom marker for mock provider
+
+  # OVH Public Cloud configuration
   ovh:
-    # OVH Public Cloud configuration
     auth:
       auth_url: https://auth.cloud.ovh.net/v3
       application_credential_id: YOUR_APPLICATION_CREDENTIAL_ID
@@ -21,10 +26,10 @@ clouds:
     identity_api_version: "3"
     volume_api_version: "3"
 
-  # Example: Another cloud configuration
-  # another-cloud:
+  # Example: Generic OpenStack configuration
+  # openstack:
   #   auth:
-  #     auth_url: https://another.cloud.net/v3
+  #     auth_url: https://openstack.example.com/v3
   #     username: user
   #     password: pass
   #     project_name: project

@@ -18,7 +18,7 @@ from app.api.routes.vm import router as vm_router
 from app.api.routes.volume import router as volume_router, snapshot_router
 from app.services.vm_service import VMService
 from app.services.volume_service import VolumeService
-from app.providers.mock_provider import MockProvider
+from app.providers.factory import create_provider, list_available_clouds
 from app.core.exceptions import OrchestratorException
 
 # Configure logging
@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 # Global service instances (will be initialized on startup)
 vm_service: VMService | None = None
 volume_service: VolumeService | None = None
+active_cloud: str | None = None  # Track which cloud is currently active
 
 
 @asynccontextmanager
@@ -44,20 +45,28 @@ async def lifespan(fast_app: FastAPI):
         - Cleanup resources
     """
     # Startup
-    global vm_service, volume_service
+    global vm_service, volume_service, active_cloud
     
     try:
         startup_time = datetime.utcnow().isoformat()
         logger.info(f"[{startup_time}] OpenStack VM Orchestrator API starting...")
         
-        # Initialize provider (using mock provider for now)
+        # List available clouds
+        available_clouds = list_available_clouds()
+        logger.info(f"Available clouds: {list(available_clouds.keys())}")
+        for cloud_name, cloud_info in available_clouds.items():
+            logger.info(f"  - {cloud_name}: {cloud_info['type']} (authenticated={cloud_info['authenticated']})")
+        
+        # Initialize provider from clouds.yaml
         logger.info("Initializing infrastructure provider...")
-        provider = MockProvider()
+        cloud_name = os.environ.get("OS_CLOUD")
+        provider = create_provider(cloud_name=cloud_name)
+        active_cloud = cloud_name or "default"
         
         # Initialize services
         vm_service = VMService(provider)
         volume_service = VolumeService(provider)
-        logger.info("Services initialized successfully")
+        logger.info(f"Services initialized successfully using cloud: {active_cloud}")
         
         # Store in app state
         fast_app.state.vm_service = vm_service
@@ -150,6 +159,40 @@ app.include_router(volume_router)
 app.include_router(snapshot_router)
 
 
+# Cloud status endpoint
+@app.get("/clouds")
+async def get_clouds_status():
+    """
+    Get status of all configured clouds.
+    
+    Returns:
+        dict: Available clouds and current active cloud
+    """
+    try:
+        available_clouds = list_available_clouds()
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "active_cloud": active_cloud,
+                "clouds": available_clouds,
+                "message": f"Currently using cloud: {active_cloud}",
+            },
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": {
+                    "code": "CLOUD_CONFIG_ERROR",
+                    "message": f"Error reading cloud configuration: {str(e)}",
+                    "status_code": 500,
+                },
+            },
+        )
+
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
@@ -164,6 +207,7 @@ async def health_check():
         content={
             "status": "healthy",
             "version": "0.1.0",
+            "active_cloud": active_cloud,
             "message": "OpenStack VM Orchestrator API is running",
         },
     )
@@ -182,8 +226,11 @@ async def hello_world():
         "message": "Hello World! OpenStack VM Orchestrator API",
         "status": "running",
         "api_version": "0.1.0",
+        "active_cloud": active_cloud,
         "docs_url": "/docs",
         "endpoints": {
+            "clouds": "/clouds",
+            "health": "/health",
             "vms": "/vms",
             "volumes": "/volumes",
             "snapshots": "/snapshots",
