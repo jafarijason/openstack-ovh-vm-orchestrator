@@ -47,7 +47,7 @@ export const Settings: React.FC = () => {
                   {activeClouds.length > 0 ? (
                     activeClouds.map((cloud) => (
                       <div
-                        key={cloud}
+                        key={cloud.name}
                         className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg"
                       >
                         <svg
@@ -57,7 +57,13 @@ export const Settings: React.FC = () => {
                         >
                           <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                         </svg>
-                        <span className="text-gray-700">{cloud}</span>
+                        <div className="flex-1">
+                          <span className="text-gray-700 font-medium">{cloud.name}</span>
+                          <div className="text-xs text-gray-500 capitalize">
+                            {cloud.type}
+                            {cloud.authenticated && ' • Authenticated'}
+                          </div>
+                        </div>
                       </div>
                     ))
                   ) : (

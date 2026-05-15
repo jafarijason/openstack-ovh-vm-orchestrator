@@ -1,8 +1,14 @@
 import { create } from 'zustand';
 import { cloudService } from '../services/cloudService';
 
+export interface Cloud {
+  name: string;
+  type: 'mock' | 'openstack' | 'other';
+  authenticated: boolean;
+}
+
 interface CloudState {
-  activeClouds: string[];
+  activeClouds: Cloud[];
   activeCloud: string;
   healthStatus: {
     status: string;
@@ -17,6 +23,7 @@ interface CloudState {
   checkHealth: () => Promise<void>;
   setError: (error: string | null) => void;
   clearError: () => void;
+  switchCloud: (cloudName: string) => void;
 }
 
 export const useCloudStore = create<CloudState>((set) => ({
@@ -30,8 +37,16 @@ export const useCloudStore = create<CloudState>((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await cloudService.getCloudsStatus();
+      // Convert clouds object to array format
+      const cloudsArray: Cloud[] = Object.entries(response.data.clouds || {}).map(
+        ([name, info]: [string, any]) => ({
+          name,
+          type: info.type || 'other',
+          authenticated: info.authenticated || false,
+        })
+      );
       set({
-        activeClouds: response.data.clouds,
+        activeClouds: cloudsArray,
         activeCloud: response.data.active_cloud,
         loading: false,
       });
@@ -51,6 +66,10 @@ export const useCloudStore = create<CloudState>((set) => ({
         error instanceof Error ? error.message : 'Health check failed';
       set({ error: errorMessage });
     }
+  },
+
+  switchCloud: (cloudName: string) => {
+    set({ activeCloud: cloudName, error: null });
   },
 
   setError: (error: string | null) => {
