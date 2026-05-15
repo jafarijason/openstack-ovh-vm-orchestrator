@@ -389,6 +389,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ssh-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Ssh Keys
+         * @description List available SSH keys with pagination.
+         *
+         *     Args:
+         *         request: FastAPI request
+         *         cloud: Cloud name (query parameter)
+         *         limit: Maximum number of results (default: 100, max: 1000)
+         *         offset: Number of results to skip (default: 0)
+         *
+         *     Returns:
+         *         List of SSH keys with pagination info
+         *
+         *     Example:
+         *         GET /ssh-keys?cloud=ovh&limit=50&offset=0
+         */
+        get: operations["list_ssh_keys_ssh_keys_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clouds": {
         parameters: {
             query?: never;
@@ -890,6 +922,22 @@ export interface components {
             /** @description Pagination metadata */
             pagination: components["schemas"]["PaginationMeta"];
         };
+        /** ListResponse[SSHKeyResponse] */
+        ListResponse_SSHKeyResponse_: {
+            /**
+             * Success
+             * @description Operation succeeded
+             * @default true
+             */
+            success: boolean;
+            /**
+             * Data
+             * @description List of items
+             */
+            data: components["schemas"]["SSHKeyResponse"][];
+            /** @description Pagination metadata */
+            pagination: components["schemas"]["PaginationMeta"];
+        };
         /**
          * PaginationMeta
          * @description Pagination metadata.
@@ -915,6 +963,71 @@ export interface components {
              * @description Total number of pages
              */
             pages: number;
+        };
+        /**
+         * SSHKeyResponse
+         * @description SSH Key response model.
+         * @example {
+         *       "comment": "user@example.com",
+         *       "created_at": "2025-05-15T10:30:00Z",
+         *       "fingerprint": "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99",
+         *       "metadata": {
+         *         "_raw": {
+         *           "created_at": "2025-05-15T10:30:00Z",
+         *           "fingerprint": "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99",
+         *           "name": "my-key",
+         *           "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDf..."
+         *         }
+         *       },
+         *       "name": "my-key",
+         *       "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDf...",
+         *       "type": "ssh-rsa",
+         *       "updated_at": "2025-05-15T10:30:00Z"
+         *     }
+         */
+        SSHKeyResponse: {
+            /**
+             * Name
+             * @description SSH key name (usually filename without path)
+             */
+            name: string;
+            /**
+             * Public Key
+             * @description Public SSH key content (ssh-rsa, ssh-ed25519, etc.)
+             */
+            public_key: string;
+            /**
+             * Fingerprint
+             * @description SSH key fingerprint (MD5 or SHA256)
+             */
+            fingerprint?: string | null;
+            /**
+             * Type
+             * @description SSH key type (ssh-rsa, ssh-ed25519, etc.)
+             */
+            type?: string | null;
+            /**
+             * Comment
+             * @description SSH key comment/email
+             */
+            comment?: string | null;
+            /**
+             * Metadata
+             * @description SSH key metadata including _raw OpenStack object
+             */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * @description SSH key creation timestamp
+             */
+            created_at?: string | null;
+            /**
+             * Updated At
+             * @description Last update timestamp
+             */
+            updated_at?: string | null;
         };
         /**
          * SnapshotResponse
@@ -1859,6 +1972,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ListResponse_FlavorResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_ssh_keys_ssh_keys_get: {
+        parameters: {
+            query?: {
+                cloud?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListResponse_SSHKeyResponse_"];
                 };
             };
             /** @description Validation Error */

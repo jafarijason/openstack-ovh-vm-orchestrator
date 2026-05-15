@@ -7,7 +7,7 @@ consistent interface and behavior.
 
 from abc import ABC, abstractmethod
 from typing import List, Optional
-from api.core.models import VM, Volume, Snapshot, Image, Flavor
+from api.core.models import VM, Volume, Snapshot, Image, Flavor, SSHKey
 
 
 class BaseProvider(ABC):
@@ -299,5 +299,19 @@ class BaseProvider(ABC):
 
         Returns:
             Tuple of (list of flavors, total count)
+        """
+        pass
+
+    # SSH Key Operations
+    @abstractmethod
+    async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> tuple[List[SSHKey], int]:
+        """List all SSH keys with pagination.
+
+        Args:
+            limit: Maximum number of results
+            offset: Number of results to skip
+
+        Returns:
+            Tuple of (list of SSH keys, total count)
         """
         pass

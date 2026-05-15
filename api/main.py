@@ -32,10 +32,12 @@ from api.api.routes.vm import router as vm_router
 from api.api.routes.volume import router as volume_router, snapshot_router
 from api.api.routes.image import router as image_router
 from api.api.routes.flavor import router as flavor_router
+from api.api.routes.ssh_key import router as ssh_key_router
 from api.services.vm_service import VMService
 from api.services.volume_service import VolumeService
 from api.services.image_service import ImageService
 from api.services.flavor_service import FlavorService
+from api.services.ssh_key_service import SSHKeyService
 from api.providers.factory import create_provider, list_available_clouds
 from api.core.exceptions import OrchestratorException
 
@@ -48,6 +50,7 @@ vm_service: VMService | None = None
 volume_service: VolumeService | None = None
 image_service: ImageService | None = None
 flavor_service: FlavorService | None = None
+ssh_key_service: SSHKeyService | None = None
 active_cloud: str | None = None  # Track which cloud is currently active
 
 
@@ -65,7 +68,7 @@ async def lifespan(fast_app: FastAPI):
         - Cleanup resources
     """
     # Startup
-    global vm_service, volume_service, image_service, flavor_service, active_cloud
+    global vm_service, volume_service, image_service, flavor_service, ssh_key_service, active_cloud
     
     try:
         startup_time = datetime.utcnow().isoformat()
@@ -93,6 +96,7 @@ async def lifespan(fast_app: FastAPI):
         volume_service = VolumeService(provider)
         image_service = ImageService(provider)
         flavor_service = FlavorService(provider)
+        ssh_key_service = SSHKeyService(provider)
         logger.info(f"Services initialized successfully using cloud: {active_cloud}")
         
         # Store in app state
@@ -100,6 +104,7 @@ async def lifespan(fast_app: FastAPI):
         fast_app.state.volume_service = volume_service
         fast_app.state.image_service = image_service
         fast_app.state.flavor_service = flavor_service
+        fast_app.state.ssh_key_service = ssh_key_service
         fast_app.state.active_cloud = active_cloud
         
         # Generate OpenAPI schema
@@ -204,6 +209,7 @@ app.include_router(volume_router)
 app.include_router(snapshot_router)
 app.include_router(image_router)
 app.include_router(flavor_router)
+app.include_router(ssh_key_router)
 
 
 # Cloud status endpoint

@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import uuid4
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, VolumeAttachment
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey, VolumeAttachment
 from api.core.exceptions import NotFoundError, ConflictError, OperationNotAllowedError
 
 
@@ -23,9 +23,11 @@ class MockProvider(BaseProvider):
         self.snapshots: dict[str, Snapshot] = {}
         self.images: dict[str, Image] = {}
         self.flavors: dict[str, Flavor] = {}
+        self.ssh_keys: dict[str, SSHKey] = {}
         self._connected = True
         self._initialize_sample_images()
         self._initialize_sample_flavors()
+        self._initialize_sample_ssh_keys()
 
     async def check_connection(self) -> bool:
         """Mock connection check always succeeds."""
@@ -504,3 +506,67 @@ class MockProvider(BaseProvider):
         ]
         for flavor in sample_flavors:
             self.flavors[flavor.id] = flavor
+
+    async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> tuple[List[SSHKey], int]:
+        """List all mock SSH keys."""
+        ssh_keys_list = list(self.ssh_keys.values())
+        total = len(ssh_keys_list)
+        return ssh_keys_list[offset : offset + limit], total
+
+    def _initialize_sample_ssh_keys(self):
+        """Initialize sample SSH keys for testing."""
+        sample_keys = [
+            SSHKey(
+                name="my-key-1",
+                public_key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDf+8yXZ9WQD3J7Z8K7L8M9O0P1Q2R3S4T5U6V7W8X9Y0Z1a2b3c4d5e6f7g8h9i0j1k2l3 user@laptop",
+                fingerprint="aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99",
+                type="ssh-rsa",
+                comment="user@laptop",
+                metadata={
+                    "_raw": {
+                        "name": "my-key-1",
+                        "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDf+8yXZ9WQD3J7Z8K7L8M9O0P1Q2R3S4T5U6V7W8X9Y0Z1a2b3c4d5e6f7g8h9i0j1k2l3 user@laptop",
+                        "fingerprint": "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99",
+                        "created_at": "2025-05-10T10:30:00Z"
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+            SSHKey(
+                name="my-key-2",
+                public_key="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGf+9yXZ9WQD3J7Z8K7L8M9O0P1Q2R3S4T5U6V7W8X9Y0Z dev@workstation",
+                fingerprint="SHA256:ZL0bL5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y9Z0a1b2c3d",
+                type="ssh-ed25519",
+                comment="dev@workstation",
+                metadata={
+                    "_raw": {
+                        "name": "my-key-2",
+                        "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGf+9yXZ9WQD3J7Z8K7L8M9O0P1Q2R3S4T5U6V7W8X9Y0Z dev@workstation",
+                        "fingerprint": "SHA256:ZL0bL5L6M7N8O9P0Q1R2S3T4U5V6W7X8Y9Z0a1b2c3d",
+                        "created_at": "2025-05-12T14:20:00Z"
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+            SSHKey(
+                name="ci-deploy-key",
+                public_key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCz+9yXZ9WQD3J7Z8K7L8M9O0P1Q2R3S4T5U6V7W8X9Y0Z1a2b3c4d5e6f7g8h9i0j1k2l3 ci@deploy",
+                fingerprint="bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99:aa",
+                type="ssh-rsa",
+                comment="ci@deploy",
+                metadata={
+                    "_raw": {
+                        "name": "ci-deploy-key",
+                        "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCz+9yXZ9WQD3J7Z8K7L8M9O0P1Q2R3S4T5U6V7W8X9Y0Z1a2b3c4d5e6f7g8h9i0j1k2l3 ci@deploy",
+                        "fingerprint": "bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99:aa",
+                        "created_at": "2025-05-01T08:00:00Z"
+                    }
+                },
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+            ),
+        ]
+        for i, key in enumerate(sample_keys):
+            self.ssh_keys[key.name] = key

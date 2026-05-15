@@ -166,3 +166,16 @@ class Flavor:
     metadata: Dict[str, Any] = field(default_factory=dict)
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+
+@dataclass
+class SSHKey:
+    """SSH Key domain model."""
+    name: str
+    public_key: str
+    fingerprint: Optional[str] = None
+    type: Optional[str] = None  # SSH key type (ssh-rsa, ssh-ed25519, etc.)
+    comment: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None

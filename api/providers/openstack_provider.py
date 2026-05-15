@@ -8,7 +8,7 @@ maps cloud operations to the provider interface.
 from typing import List, Optional
 from datetime import datetime
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, VolumeAttachment
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey, VolumeAttachment
 from api.core.exceptions import (
     CloudConnectionError,
     CloudOperationError,
@@ -614,4 +614,33 @@ class OpenStackProvider(BaseProvider):
             metadata=metadata,
             created_at=getattr(os_flavor, 'created_at', None),
             updated_at=getattr(os_flavor, 'updated_at', None),
+        )
+
+    async def list_ssh_keys(self, limit: int = 100, offset: int = 0) -> tuple[List[SSHKey], int]:
+        """List SSH keys from OpenStack."""
+        try:
+            compute = self.engine.get_compute()
+            # Get all keypairs and paginate manually
+            all_keypairs = list(compute.keypairs())
+            total = len(all_keypairs)
+            keypairs_page = all_keypairs[offset : offset + limit]
+            return [self._ssh_key_from_os(k) for k in keypairs_page], total
+        except Exception as e:
+            raise CloudOperationError("list_ssh_keys", str(e))
+
+    def _ssh_key_from_os(self, os_keypair) -> SSHKey:
+        """Convert OpenStack keypair to domain model."""
+        # Preserve full OS object as _raw
+        metadata = {}
+        metadata["_raw"] = self._object_to_dict(os_keypair)
+        
+        return SSHKey(
+            name=os_keypair.name,
+            public_key=getattr(os_keypair, 'public_key', ''),
+            fingerprint=getattr(os_keypair, 'fingerprint', None),
+            type=getattr(os_keypair, 'type', None),
+            comment=getattr(os_keypair, 'comment', None),
+            metadata=metadata,
+            created_at=getattr(os_keypair, 'created_at', None),
+            updated_at=getattr(os_keypair, 'updated_at', None),
         )
