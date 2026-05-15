@@ -8,9 +8,26 @@ import json
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
+import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+
+from app.api.routes.vm import router as vm_router
+from app.api.routes.volume import router as volume_router, snapshot_router
+from app.services.vm_service import VMService
+from app.services.volume_service import VolumeService
+from app.providers.mock_provider import MockProvider
+from app.core.exceptions import OrchestratorException
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Global service instances (will be initialized on startup)
+vm_service: VMService | None = None
+volume_service: VolumeService | None = None
 
 
 @asynccontextmanager
@@ -19,6 +36,7 @@ async def lifespan(fast_app: FastAPI):
     Manage application lifespan: startup and shutdown.
     
     Startup:
+        - Initialize provider and services
         - Save OpenAPI schema to schema.json
         - Initialize application resources
     
@@ -26,7 +44,25 @@ async def lifespan(fast_app: FastAPI):
         - Cleanup resources
     """
     # Startup
+    global vm_service, volume_service
+    
     try:
+        startup_time = datetime.utcnow().isoformat()
+        logger.info(f"[{startup_time}] OpenStack VM Orchestrator API starting...")
+        
+        # Initialize provider (using mock provider for now)
+        logger.info("Initializing infrastructure provider...")
+        provider = MockProvider()
+        
+        # Initialize services
+        vm_service = VMService(provider)
+        volume_service = VolumeService(provider)
+        logger.info("Services initialized successfully")
+        
+        # Store in app state
+        fast_app.state.vm_service = vm_service
+        fast_app.state.volume_service = volume_service
+        
         # Generate OpenAPI schema
         openapi_schema = fast_app.openapi()
         
@@ -47,19 +83,19 @@ async def lifespan(fast_app: FastAPI):
         with open(schema_path, "w") as f:
             json.dump(openapi_schema, f, indent=2)
         
-        startup_time = datetime.utcnow().isoformat()
-        print(f"[{startup_time}] OpenAPI schema saved to {schema_path}")
-        print(f"[{startup_time}] OpenStack VM Orchestrator API started")
+        logger.info(f"OpenAPI schema saved to {schema_path}")
+        logger.info(f"[{startup_time}] OpenStack VM Orchestrator API started")
         
-    except (IOError, OSError, json.JSONDecodeError) as e:
-        print(f"Error saving OpenAPI schema: {e}")
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
+        raise
     
     # Yield control to application
     yield
     
     # Shutdown
     shutdown_time = datetime.utcnow().isoformat()
-    print(f"[{shutdown_time}] OpenStack VM Orchestrator API shutting down")
+    logger.info(f"[{shutdown_time}] OpenStack VM Orchestrator API shutting down")
 
 
 # Initialize FastAPI app with lifespan
@@ -72,6 +108,46 @@ app = FastAPI(
     redoc_url=None,  # Disable ReDoc
     openapi_url="/openapi.json",
 )
+
+
+# Exception handlers
+@app.exception_handler(OrchestratorException)
+async def orchestrator_exception_handler(request: Request, exc: OrchestratorException):
+    """Handle orchestrator exceptions."""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": {
+                "code": exc.code,
+                "message": exc.message,
+                "status_code": exc.status_code,
+            },
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors."""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Request validation failed",
+                "status_code": 422,
+                "details": exc.errors(),
+            },
+        },
+    )
+
+
+# Include routers
+app.include_router(vm_router)
+app.include_router(volume_router)
+app.include_router(snapshot_router)
 
 
 # Health check endpoint
@@ -107,6 +183,11 @@ async def hello_world():
         "status": "running",
         "api_version": "0.1.0",
         "docs_url": "/docs",
+        "endpoints": {
+            "vms": "/vms",
+            "volumes": "/volumes",
+            "snapshots": "/snapshots",
+        },
     }
 
 

@@ -1,0 +1,34 @@
+# OpenStack Cloud Configuration
+# Copy this file to clouds.yaml and fill in your credentials
+# Reference: https://docs.openstack.org/openstacksdk/latest/user/config/configuration.html
+
+clouds:
+  ovh:
+    # OVH Public Cloud configuration
+    auth:
+      auth_url: https://auth.cloud.ovh.net/v3
+      application_credential_id: YOUR_APPLICATION_CREDENTIAL_ID
+      application_credential_secret: YOUR_APPLICATION_CREDENTIAL_SECRET
+      # OR use username/password authentication:
+      # username: YOUR_USERNAME
+      # password: YOUR_PASSWORD
+      # project_name: YOUR_PROJECT_NAME
+      # user_domain_name: Default
+      # project_domain_name: Default
+    
+    region_name: SBG5  # Change to your region: SBG1, SBG3, SBG5, BHS1, BHS3, GRA1, WAW1, etc.
+    interface: public
+    identity_api_version: "3"
+    volume_api_version: "3"
+
+  # Example: Another cloud configuration
+  # another-cloud:
+  #   auth:
+  #     auth_url: https://another.cloud.net/v3
+  #     username: user
+  #     password: pass
+  #     project_name: project
+  #     user_domain_name: Default
+  #     project_domain_name: Default
+  #   region_name: RegionOne
+  #   interface: public

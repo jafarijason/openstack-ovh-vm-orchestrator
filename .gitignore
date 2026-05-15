@@ -44,6 +44,7 @@ htmlcov/
 .env
 .env.local
 openrc.sh
+clouds.yaml
 
 # Project specific
 *.log
