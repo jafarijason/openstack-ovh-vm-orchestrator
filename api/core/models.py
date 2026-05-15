@@ -40,6 +40,31 @@ class FlavorStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
+class NetworkStatus(str, Enum):
+    """Network lifecycle status."""
+    ACTIVE = "ACTIVE"
+    BUILD = "BUILD"
+    DOWN = "DOWN"
+    ERROR = "ERROR"
+    UNKNOWN = "UNKNOWN"
+
+
+@dataclass
+class Network:
+    """Network domain model."""
+    id: str
+    name: str
+    status: NetworkStatus
+    is_external: bool = False
+    is_shared: bool = False
+    mtu: Optional[int] = None
+    description: Optional[str] = None
+    subnets: List[str] = field(default_factory=list)  # List of subnet IDs
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
 @dataclass
 class Image:
     """Image domain model."""

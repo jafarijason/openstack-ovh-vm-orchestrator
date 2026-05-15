@@ -7,6 +7,7 @@ import { VmList } from './pages/VmList';
 import { ImageList } from './pages/ImageList';
 import { FlavorList } from './pages/FlavorList';
 import { SSHKeyList } from './pages/SSHKeyList';
+import { NetworkList } from './pages/NetworkList';
 import { Settings } from './pages/Settings';
 import { NotFound } from './pages/NotFound';
 import { useCloudStore } from './stores/cloudStore';
@@ -33,6 +34,7 @@ export const App: React.FC = () => {
                 <Route path="/images" element={<ImageList />} />
                 <Route path="/flavors" element={<FlavorList />} />
                 <Route path="/ssh-keys" element={<SSHKeyList />} />
+                <Route path="/networks" element={<NetworkList />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

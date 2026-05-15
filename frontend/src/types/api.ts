@@ -218,6 +218,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/networks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Networks
+         * @description List available networks with pagination.
+         *
+         *     Args:
+         *         request: FastAPI request
+         *         cloud: Cloud name (query parameter)
+         *         limit: Maximum number of results (default: 100, max: 1000)
+         *         offset: Number of results to skip (default: 0)
+         *
+         *     Returns:
+         *         List of networks with pagination info
+         *
+         *     Example:
+         *         GET /networks?cloud=ovh&limit=50&offset=0
+         */
+        get: operations["list_networks_networks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/networks/{network_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Network
+         * @description Get network by ID.
+         *
+         *     Args:
+         *         request: FastAPI request
+         *         network_id: Network unique identifier
+         *         cloud: Cloud name (query parameter)
+         *
+         *     Returns:
+         *         Network details
+         *
+         *     Example:
+         *         GET /networks/net-private?cloud=ovh
+         */
+        get: operations["get_network_networks__network_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clouds": {
         parameters: {
             query?: never;
@@ -621,6 +684,22 @@ export interface components {
             /** @description Pagination metadata */
             pagination: components["schemas"]["PaginationMeta"];
         };
+        /** ListResponse[NetworkResponse] */
+        ListResponse_NetworkResponse_: {
+            /**
+             * Success
+             * @description Operation succeeded
+             * @default true
+             */
+            success: boolean;
+            /**
+             * Data
+             * @description List of items
+             */
+            data: components["schemas"]["NetworkResponse"][];
+            /** @description Pagination metadata */
+            pagination: components["schemas"]["PaginationMeta"];
+        };
         /** ListResponse[SSHKeyResponse] */
         ListResponse_SSHKeyResponse_: {
             /**
@@ -636,6 +715,96 @@ export interface components {
             data: components["schemas"]["SSHKeyResponse"][];
             /** @description Pagination metadata */
             pagination: components["schemas"]["PaginationMeta"];
+        };
+        /**
+         * NetworkResponse
+         * @description Network response model.
+         * @example {
+         *       "created_at": "2025-05-15T10:30:00Z",
+         *       "description": "Private network for internal communication",
+         *       "id": "net-private",
+         *       "is_external": false,
+         *       "is_shared": false,
+         *       "metadata": {
+         *         "_raw": {
+         *           "admin_state_up": true,
+         *           "external": false,
+         *           "id": "net-private",
+         *           "mtu": 1500,
+         *           "name": "Private Network",
+         *           "shared": false,
+         *           "status": "ACTIVE"
+         *         }
+         *       },
+         *       "mtu": 1500,
+         *       "name": "Private Network",
+         *       "status": "ACTIVE",
+         *       "subnets": [
+         *         "subnet-private"
+         *       ],
+         *       "updated_at": "2025-05-15T10:30:00Z"
+         *     }
+         */
+        NetworkResponse: {
+            /**
+             * Id
+             * @description Unique network identifier
+             */
+            id: string;
+            /**
+             * Name
+             * @description Network name
+             */
+            name: string;
+            /**
+             * Status
+             * @description Network status (ACTIVE, BUILD, DOWN, ERROR, UNKNOWN)
+             */
+            status: string;
+            /**
+             * Is External
+             * @description Whether network is external/provider network
+             * @default false
+             */
+            is_external: boolean;
+            /**
+             * Is Shared
+             * @description Whether network is shared across projects
+             * @default false
+             */
+            is_shared: boolean;
+            /**
+             * Mtu
+             * @description Maximum transmission unit in bytes
+             */
+            mtu?: number | null;
+            /**
+             * Description
+             * @description Network description
+             */
+            description?: string | null;
+            /**
+             * Subnets
+             * @description List of subnet IDs on this network
+             */
+            subnets?: string[];
+            /**
+             * Metadata
+             * @description Network metadata including _raw OpenStack object
+             */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * @description Network creation timestamp
+             */
+            created_at?: string | null;
+            /**
+             * Updated At
+             * @description Last update timestamp
+             */
+            updated_at?: string | null;
         };
         /**
          * PaginationMeta
@@ -727,6 +896,22 @@ export interface components {
              * @description Last update timestamp
              */
             updated_at?: string | null;
+        };
+        /** SuccessResponse[NetworkResponse] */
+        SuccessResponse_NetworkResponse_: {
+            /**
+             * Success
+             * @description Operation succeeded
+             * @default true
+             */
+            success: boolean;
+            /** @description Response data */
+            data: components["schemas"]["NetworkResponse"];
+            /**
+             * Message
+             * @description Optional success message
+             */
+            message?: string | null;
         };
         /** SuccessResponse[VMActionResponse] */
         SuccessResponse_VMActionResponse_: {
@@ -1169,6 +1354,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ListResponse_SSHKeyResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_networks_networks_get: {
+        parameters: {
+            query?: {
+                cloud?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListResponse_NetworkResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_network_networks__network_id__get: {
+        parameters: {
+            query?: {
+                cloud?: string | null;
+            };
+            header?: never;
+            path: {
+                /** @description Network unique identifier */
+                network_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuccessResponse_NetworkResponse_"];
                 };
             };
             /** @description Validation Error */

@@ -82,6 +82,20 @@ export const Sidebar: React.FC = () => {
       ),
     },
     {
+      path: '/networks',
+      label: 'Networks',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9.75 17L9 20m0 0l-.75 3M9 20a6 6 0 1112 0m-8-3l.75-3m0 0l.75 3M21 20a6 6 0 11-12 0m8-3l-.75-3m0 0l-.75 3"
+          />
+        </svg>
+      ),
+    },
+    {
       path: '/settings',
       label: 'Settings',
       icon: (

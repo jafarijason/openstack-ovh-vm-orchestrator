@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import uuid4
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey
+from api.core.models import VM, VMStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey, Network, NetworkStatus
 from api.core.exceptions import NotFoundError, OperationNotAllowedError
 
 
@@ -17,15 +17,17 @@ class MockProvider(BaseProvider):
     """In-memory mock provider for testing."""
 
     def __init__(self):
-        """Initialize mock provider with empty resource storage."""
-        self.vms: dict[str, VM] = {}
-        self.images: dict[str, Image] = {}
-        self.flavors: dict[str, Flavor] = {}
-        self.ssh_keys: dict[str, SSHKey] = {}
-        self._connected = True
-        self._initialize_sample_images()
-        self._initialize_sample_flavors()
-        self._initialize_sample_ssh_keys()
+         """Initialize mock provider with empty resource storage."""
+         self.vms: dict[str, VM] = {}
+         self.images: dict[str, Image] = {}
+         self.flavors: dict[str, Flavor] = {}
+         self.ssh_keys: dict[str, SSHKey] = {}
+         self.networks: dict[str, Network] = {}
+         self._connected = True
+         self._initialize_sample_images()
+         self._initialize_sample_flavors()
+         self._initialize_sample_ssh_keys()
+         self._initialize_sample_networks()
 
     async def check_connection(self) -> bool:
         """Mock connection check always succeeds."""
@@ -417,3 +419,88 @@ class MockProvider(BaseProvider):
         ]
         for i, key in enumerate(sample_keys):
             self.ssh_keys[key.name] = key
+
+    async def get_network(self, network_id: str) -> Network:
+        """Get mock network by ID."""
+        if network_id not in self.networks:
+            raise NotFoundError("Network", network_id)
+        return self.networks[network_id]
+
+    async def list_networks(self, limit: int = 100, offset: int = 0) -> tuple[List[Network], int]:
+        """List all mock networks."""
+        networks_list = list(self.networks.values())
+        total = len(networks_list)
+        return networks_list[offset : offset + limit], total
+
+    def _initialize_sample_networks(self):
+        """Initialize sample networks for testing."""
+        sample_networks = [
+            Network(
+                id="net-public",
+                name="Public Network",
+                status=NetworkStatus.ACTIVE,
+                is_external=True,
+                is_shared=True,
+                mtu=1500,
+                description="Public network for external access",
+                subnets=["subnet-public"],
+                metadata={
+                    "_raw": {
+                        "id": "net-public",
+                        "name": "Public Network",
+                        "status": "ACTIVE",
+                        "admin_state_up": True,
+                        "shared": True,
+                        "external": True,
+                        "mtu": 1500,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=60),
+            ),
+            Network(
+                id="net-private",
+                name="Private Network",
+                status=NetworkStatus.ACTIVE,
+                is_external=False,
+                is_shared=False,
+                mtu=1500,
+                description="Private network for internal communication",
+                subnets=["subnet-private"],
+                metadata={
+                    "_raw": {
+                        "id": "net-private",
+                        "name": "Private Network",
+                        "status": "ACTIVE",
+                        "admin_state_up": True,
+                        "shared": False,
+                        "external": False,
+                        "mtu": 1500,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=30),
+            ),
+            Network(
+                id="net-management",
+                name="Management Network",
+                status=NetworkStatus.ACTIVE,
+                is_external=False,
+                is_shared=True,
+                mtu=1500,
+                description="Management network for infrastructure",
+                subnets=["subnet-management"],
+                metadata={
+                    "_raw": {
+                        "id": "net-management",
+                        "name": "Management Network",
+                        "status": "ACTIVE",
+                        "admin_state_up": True,
+                        "shared": True,
+                        "external": False,
+                        "mtu": 1500,
+                    }
+                },
+                created_at=datetime.now() - timedelta(days=15),
+            ),
+        ]
+        for network in sample_networks:
+            self.networks[network.id] = network

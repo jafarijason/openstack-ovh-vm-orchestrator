@@ -8,7 +8,7 @@ maps cloud operations to the provider interface.
 from typing import List, Optional
 from datetime import datetime
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey
+from api.core.models import VM, VMStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey, Network, NetworkStatus
 from api.core.exceptions import (
     CloudConnectionError,
     CloudOperationError,
@@ -398,4 +398,60 @@ class OpenStackProvider(BaseProvider):
             metadata=metadata,
             created_at=getattr(os_keypair, 'created_at', None),
             updated_at=getattr(os_keypair, 'updated_at', None),
+        )
+
+    # Network Operations
+    async def get_network(self, network_id: str) -> Network:
+        """Get network from OpenStack."""
+        try:
+            network_service = self.engine.get_network()
+            network = network_service.get_network(network_id)
+            if not network:
+                raise NotFoundError("Network", network_id)
+            return self._network_from_os(network)
+        except NotFoundError:
+            raise
+        except Exception as e:
+            raise CloudOperationError("get_network", str(e))
+
+    async def list_networks(self, limit: int = 100, offset: int = 0) -> tuple[List[Network], int]:
+        """List networks from OpenStack."""
+        try:
+            network_service = self.engine.get_network()
+            # Only use marker if offset is not 0 (OpenStack quirk)
+            if offset > 0:
+                networks = list(network_service.networks(limit=limit, marker=offset))
+            else:
+                networks = list(network_service.networks(limit=limit))
+            
+            total = len(networks) + offset
+            return [self._network_from_os(n) for n in networks], total
+        except Exception as e:
+            raise CloudOperationError("list_networks", str(e))
+
+    def _network_from_os(self, os_network) -> Network:
+        """Convert OpenStack network to domain model."""
+        # Preserve full OS object as _raw
+        metadata = {}
+        metadata["_raw"] = self._object_to_dict(os_network)
+        
+        # Map network status
+        status_str = getattr(os_network, 'status', 'UNKNOWN')
+        try:
+            status = NetworkStatus(status_str.upper()) if status_str else NetworkStatus.UNKNOWN
+        except ValueError:
+            status = NetworkStatus.UNKNOWN
+        
+        return Network(
+            id=os_network.id,
+            name=os_network.name,
+            status=status,
+            is_external=getattr(os_network, 'is_external', False),
+            is_shared=getattr(os_network, 'is_shared', False),
+            mtu=getattr(os_network, 'mtu', None),
+            description=getattr(os_network, 'description', None),
+            subnets=getattr(os_network, 'subnets', []) or [],
+            metadata=metadata,
+            created_at=getattr(os_network, 'created_at', None),
+            updated_at=getattr(os_network, 'updated_at', None),
         )
