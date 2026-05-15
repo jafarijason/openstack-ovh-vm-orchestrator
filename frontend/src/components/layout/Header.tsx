@@ -84,8 +84,8 @@ export const Header: React.FC = () => {
                  </svg>
                </button>
 
-               {/* API Dropdown Menu */}
-               <div className="absolute left-0 mt-0 w-56 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                {/* API Dropdown Menu */}
+                <div className="absolute left-0 mt-0 w-52 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                  <a
                    href={`${API_BASE_URL}`}
                    target="_blank"
@@ -110,54 +110,30 @@ export const Header: React.FC = () => {
                    </div>
                    <div className="text-xs text-gray-500 mt-1 truncate">{API_BASE_URL}</div>
                  </a>
-                 <a
-                   href={`${API_BASE_URL}/docs`}
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   className="block w-full text-left px-4 py-3 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 border-b border-gray-100 transition-colors"
-                 >
-                   <div className="flex items-center gap-2">
-                     <svg
-                       className="w-4 h-4"
-                       fill="none"
-                       stroke="currentColor"
-                       viewBox="0 0 24 24"
-                     >
-                       <path
-                         strokeLinecap="round"
-                         strokeLinejoin="round"
-                         strokeWidth={2}
-                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                       />
-                     </svg>
-                     <span className="font-medium">Swagger UI</span>
-                   </div>
-                   <div className="text-xs text-gray-500 mt-1">Interactive API documentation</div>
-                 </a>
-                 <a
-                   href={`${API_BASE_URL}/redoc`}
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   className="block w-full text-left px-4 py-3 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 last:rounded-b-lg transition-colors"
-                 >
-                   <div className="flex items-center gap-2">
-                     <svg
-                       className="w-4 h-4"
-                       fill="none"
-                       stroke="currentColor"
-                       viewBox="0 0 24 24"
-                     >
-                       <path
-                         strokeLinecap="round"
-                         strokeLinejoin="round"
-                         strokeWidth={2}
-                         d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17s4.5 10.747 10 10.747c5.5 0 10-4.998 10-10.747S17.5 6.253 12 6.253z"
-                       />
-                     </svg>
-                     <span className="font-medium">ReDoc</span>
-                   </div>
-                   <div className="text-xs text-gray-500 mt-1">Alternative API documentation</div>
-                 </a>
+                  <a
+                    href={`${API_BASE_URL}/docs`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-left px-4 py-3 hover:bg-emerald-50 text-gray-700 hover:text-emerald-700 border-b border-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span className="font-medium">Swagger UI</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">Interactive API documentation</div>
+                  </a>
                  <a
                    href={`${API_BASE_URL}/openapi.json`}
                    target="_blank"
