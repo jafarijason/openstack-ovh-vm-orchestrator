@@ -32,10 +32,11 @@ export const SSHKeyList: React.FC = () => {
   };
 
   useEffect(() => {
-    if (activeClouds.length > 0 && activeCloud) {
+    // Load SSH keys when activeCloud changes
+    if (activeCloud && activeCloud.trim()) {
       loadSSHKeys(activeCloud);
     }
-  }, [activeCloud, activeClouds]);
+  }, [activeCloud]);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);

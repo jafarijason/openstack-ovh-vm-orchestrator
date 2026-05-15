@@ -620,7 +620,8 @@ class OpenStackProvider(BaseProvider):
         """List SSH keys from OpenStack."""
         try:
             compute = self.engine.get_compute()
-            # Get all keypairs and paginate manually
+            # Get all keypairs using OpenStack SDK
+            # Note: This returns SSH keypairs configured in the OpenStack project
             all_keypairs = list(compute.keypairs())
             total = len(all_keypairs)
             keypairs_page = all_keypairs[offset : offset + limit]
