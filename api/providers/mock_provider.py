@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import uuid4
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey, VolumeAttachment
-from api.core.exceptions import NotFoundError, ConflictError, OperationNotAllowedError
+from api.core.models import VM, VMStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey
+from api.core.exceptions import NotFoundError, OperationNotAllowedError
 
 
 class MockProvider(BaseProvider):
@@ -19,8 +19,6 @@ class MockProvider(BaseProvider):
     def __init__(self):
         """Initialize mock provider with empty resource storage."""
         self.vms: dict[str, VM] = {}
-        self.volumes: dict[str, Volume] = {}
-        self.snapshots: dict[str, Snapshot] = {}
         self.images: dict[str, Image] = {}
         self.flavors: dict[str, Flavor] = {}
         self.ssh_keys: dict[str, SSHKey] = {}
@@ -112,157 +110,6 @@ class MockProvider(BaseProvider):
         # Simulate reboot completion
         vm.status = VMStatus.ACTIVE
         return vm
-
-    # Volume Operations
-    async def create_volume(
-        self,
-        name: str,
-        size_gb: int,
-        volume_type: Optional[str] = None,
-        description: Optional[str] = None,
-        metadata: Optional[dict] = None,
-    ) -> Volume:
-        """Create a mock volume."""
-        volume = Volume(
-            id=f"vol-{uuid4().hex[:8]}",
-            name=name,
-            size_gb=size_gb,
-            status=VolumeStatus.CREATING,
-            volume_type=volume_type,
-            description=description,
-            metadata=metadata or {},
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-        )
-        # Simulate transition to AVAILABLE after creation
-        volume.status = VolumeStatus.AVAILABLE
-        self.volumes[volume.id] = volume
-        return volume
-
-    async def get_volume(self, volume_id: str) -> Volume:
-        """Get mock volume by ID."""
-        if volume_id not in self.volumes:
-            raise NotFoundError("Volume", volume_id)
-        return self.volumes[volume_id]
-
-    async def list_volumes(self, limit: int = 100, offset: int = 0) -> tuple[List[Volume], int]:
-        """List all mock volumes."""
-        volumes_list = list(self.volumes.values())
-        total = len(volumes_list)
-        return volumes_list[offset : offset + limit], total
-
-    async def delete_volume(self, volume_id: str) -> bool:
-        """Delete a mock volume."""
-        volume = self.volumes.get(volume_id)
-        if not volume:
-            return False
-        if volume.is_attached:
-            raise ConflictError(
-                f"Volume {volume_id} is attached to VM and cannot be deleted",
-                "VOLUME_ATTACHED",
-            )
-        del self.volumes[volume_id]
-        return True
-
-    async def attach_volume(
-        self,
-        volume_id: str,
-        vm_id: str,
-        device: Optional[str] = None,
-    ) -> Volume:
-        """Attach a mock volume to a VM."""
-        volume = await self.get_volume(volume_id)
-        vm = await self.get_vm(vm_id)
-
-        if volume.status != VolumeStatus.AVAILABLE:
-            raise ConflictError(
-                f"Volume {volume_id} is not available for attachment",
-                "VOLUME_NOT_AVAILABLE",
-            )
-
-        # Create attachment
-        device = device or f"/dev/vd{chr(ord('b') + len(volume.attachments))}"
-        attachment = VolumeAttachment(
-            attachment_id=f"attach-{uuid4().hex[:8]}",
-            vm_id=vm_id,
-            device=device,
-        )
-        volume.attachments.append(attachment)
-        volume.status = VolumeStatus.IN_USE
-        volume.updated_at = datetime.utcnow()
-
-        # Also update VM's attached volumes
-        if volume_id not in vm.attached_volumes:
-            vm.attached_volumes.append(volume_id)
-
-        return volume
-
-    async def detach_volume(self, volume_id: str) -> Volume:
-        """Detach a mock volume."""
-        volume = await self.get_volume(volume_id)
-
-        if not volume.is_attached:
-            raise ConflictError(
-                f"Volume {volume_id} is not attached",
-                "VOLUME_NOT_ATTACHED",
-            )
-
-        # Remove attachments
-        for attachment in volume.attachments:
-            vm = self.vms.get(attachment.vm_id)
-            if vm and volume_id in vm.attached_volumes:
-                vm.attached_volumes.remove(volume_id)
-
-        volume.attachments = []
-        volume.status = VolumeStatus.AVAILABLE
-        volume.updated_at = datetime.utcnow()
-        return volume
-
-    # Snapshot Operations
-    async def create_snapshot(
-        self,
-        name: str,
-        volume_id: str,
-        description: Optional[str] = None,
-        metadata: Optional[dict] = None,
-    ) -> Snapshot:
-        """Create a mock snapshot."""
-        volume = await self.get_volume(volume_id)
-
-        snapshot = Snapshot(
-            id=f"snap-{uuid4().hex[:8]}",
-            name=name,
-            volume_id=volume_id,
-            size_gb=volume.size_gb,
-            status=SnapshotStatus.CREATING,
-            description=description,
-            metadata=metadata or {},
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-        )
-        # Simulate transition to AVAILABLE after creation
-        snapshot.status = SnapshotStatus.AVAILABLE
-        self.snapshots[snapshot.id] = snapshot
-        return snapshot
-
-    async def get_snapshot(self, snapshot_id: str) -> Snapshot:
-        """Get mock snapshot by ID."""
-        if snapshot_id not in self.snapshots:
-            raise NotFoundError("Snapshot", snapshot_id)
-        return self.snapshots[snapshot_id]
-
-    async def list_snapshots(self, limit: int = 100, offset: int = 0) -> tuple[List[Snapshot], int]:
-        """List all mock snapshots."""
-        snapshots_list = list(self.snapshots.values())
-        total = len(snapshots_list)
-        return snapshots_list[offset : offset + limit], total
-
-    async def delete_snapshot(self, snapshot_id: str) -> bool:
-        """Delete a mock snapshot."""
-        if snapshot_id not in self.snapshots:
-            return False
-        del self.snapshots[snapshot_id]
-        return True
 
     # Image Operations
     def _initialize_sample_images(self):

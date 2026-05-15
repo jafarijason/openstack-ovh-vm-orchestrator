@@ -4,8 +4,6 @@ import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { Dashboard } from './pages/Dashboard';
 import { VmList } from './pages/VmList';
-import { VolumeList } from './pages/VolumeList';
-import { SnapshotList } from './pages/SnapshotList';
 import { ImageList } from './pages/ImageList';
 import { FlavorList } from './pages/FlavorList';
 import { SSHKeyList } from './pages/SSHKeyList';
@@ -32,8 +30,6 @@ export const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/vms" element={<VmList />} />
-                <Route path="/volumes" element={<VolumeList />} />
-                <Route path="/snapshots" element={<SnapshotList />} />
                 <Route path="/images" element={<ImageList />} />
                 <Route path="/flavors" element={<FlavorList />} />
                 <Route path="/ssh-keys" element={<SSHKeyList />} />

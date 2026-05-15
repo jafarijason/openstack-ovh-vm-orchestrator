@@ -29,12 +29,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.api.routes.vm import router as vm_router
-from api.api.routes.volume import router as volume_router, snapshot_router
 from api.api.routes.image import router as image_router
 from api.api.routes.flavor import router as flavor_router
 from api.api.routes.ssh_key import router as ssh_key_router
 from api.services.vm_service import VMService
-from api.services.volume_service import VolumeService
 from api.services.image_service import ImageService
 from api.services.flavor_service import FlavorService
 from api.services.ssh_key_service import SSHKeyService
@@ -47,7 +45,6 @@ logger = logging.getLogger(__name__)
 
 # Global service instances (will be initialized on startup)
 vm_service: VMService | None = None
-volume_service: VolumeService | None = None
 image_service: ImageService | None = None
 flavor_service: FlavorService | None = None
 ssh_key_service: SSHKeyService | None = None
@@ -68,7 +65,7 @@ async def lifespan(fast_app: FastAPI):
         - Cleanup resources
     """
     # Startup
-    global vm_service, volume_service, image_service, flavor_service, ssh_key_service, active_cloud
+    global vm_service, image_service, flavor_service, ssh_key_service, active_cloud
     
     try:
         startup_time = datetime.utcnow().isoformat()
@@ -93,7 +90,6 @@ async def lifespan(fast_app: FastAPI):
         
         # Initialize services
         vm_service = VMService(provider)
-        volume_service = VolumeService(provider)
         image_service = ImageService(provider)
         flavor_service = FlavorService(provider)
         ssh_key_service = SSHKeyService(provider)
@@ -101,7 +97,6 @@ async def lifespan(fast_app: FastAPI):
         
         # Store in app state
         fast_app.state.vm_service = vm_service
-        fast_app.state.volume_service = volume_service
         fast_app.state.image_service = image_service
         fast_app.state.flavor_service = flavor_service
         fast_app.state.ssh_key_service = ssh_key_service
@@ -205,8 +200,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 # Include routers
 app.include_router(vm_router)
-app.include_router(volume_router)
-app.include_router(snapshot_router)
 app.include_router(image_router)
 app.include_router(flavor_router)
 app.include_router(ssh_key_router)
@@ -285,8 +278,6 @@ async def hello_world():
             "clouds": "/clouds",
             "health": "/health",
             "vms": "/vms",
-            "volumes": "/volumes",
-            "snapshots": "/snapshots",
         },
     }
 

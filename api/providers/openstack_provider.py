@@ -8,12 +8,11 @@ maps cloud operations to the provider interface.
 from typing import List, Optional
 from datetime import datetime
 from api.providers.base import BaseProvider
-from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey, VolumeAttachment
+from api.core.models import VM, VMStatus, Image, ImageStatus, Flavor, FlavorStatus, SSHKey
 from api.core.exceptions import (
     CloudConnectionError,
     CloudOperationError,
     NotFoundError,
-    ConflictError,
     OperationNotAllowedError,
 )
 
@@ -101,29 +100,6 @@ class OpenStackProvider(BaseProvider):
         }
         return status_map.get(os_status.upper(), VMStatus.UNKNOWN)
 
-    def _map_volume_status(self, os_status: str) -> VolumeStatus:
-        """Map OpenStack volume status to our VolumeStatus enum."""
-        status_map = {
-            "CREATING": VolumeStatus.CREATING,
-            "AVAILABLE": VolumeStatus.AVAILABLE,
-            "IN_USE": VolumeStatus.IN_USE,
-            "DELETING": VolumeStatus.DELETING,
-            "ERROR": VolumeStatus.ERROR,
-            "BACKING_UP": VolumeStatus.BACKING_UP,
-            "RESTORING_BACKUP": VolumeStatus.RESTORING_BACKUP,
-        }
-        return status_map.get(os_status.upper(), VolumeStatus.UNKNOWN)
-
-    def _map_snapshot_status(self, os_status: str) -> SnapshotStatus:
-        """Map OpenStack snapshot status to our SnapshotStatus enum."""
-        status_map = {
-            "CREATING": SnapshotStatus.CREATING,
-            "AVAILABLE": SnapshotStatus.AVAILABLE,
-            "DELETING": SnapshotStatus.DELETING,
-            "ERROR": SnapshotStatus.ERROR,
-        }
-        return status_map.get(os_status.upper(), SnapshotStatus.UNKNOWN)
-
     def _vm_from_os(self, server) -> VM:
         """Convert OpenStack server object to our VM model."""
         # Preserve user metadata and add full OS object as _raw
@@ -143,51 +119,6 @@ class OpenStackProvider(BaseProvider):
             attached_volumes=[vol.get("id", "") for vol in (server.attached_volumes or [])],
             created_at=server.created_at,
             updated_at=server.updated_at,
-        )
-
-    def _volume_from_os(self, volume) -> Volume:
-        """Convert OpenStack volume object to our Volume model."""
-        attachments = [
-            VolumeAttachment(
-                attachment_id=att.get("id", ""),
-                vm_id=att.get("server_id", ""),
-                device=att.get("device", ""),
-            )
-            for att in (volume.attachments or [])
-        ]
-        # Preserve user metadata and add full OS object as _raw
-        metadata = dict(volume.metadata) if volume.metadata else {}
-        metadata["_raw"] = self._object_to_dict(volume)
-        
-        return Volume(
-            id=volume.id,
-            name=volume.name,
-            size_gb=volume.size,
-            status=self._map_volume_status(volume.status),
-            volume_type=volume.volume_type,
-            description=volume.description,
-            attachments=attachments,
-            metadata=metadata,
-            created_at=volume.created_at,
-            updated_at=volume.updated_at,
-        )
-
-    def _snapshot_from_os(self, snapshot) -> Snapshot:
-        """Convert OpenStack snapshot object to our Snapshot model."""
-        # Preserve user metadata and add full OS object as _raw
-        metadata = dict(snapshot.metadata) if snapshot.metadata else {}
-        metadata["_raw"] = self._object_to_dict(snapshot)
-        
-        return Snapshot(
-            id=snapshot.id,
-            name=snapshot.name,
-            volume_id=snapshot.volume_id,
-            size_gb=snapshot.size,
-            status=self._map_snapshot_status(snapshot.status),
-            description=snapshot.description,
-            metadata=metadata,
-            created_at=snapshot.created_at,
-            updated_at=snapshot.updated_at,
         )
 
     # VM Operations
@@ -297,10 +228,6 @@ class OpenStackProvider(BaseProvider):
         except (NotFoundError, OperationNotAllowedError):
             raise
         except Exception as e:
-            error_str = str(e).lower()
-            # Handle 409 Conflict - VM may already be starting or in transitional state
-            if "409" in error_str or "conflict" in error_str:
-                raise ConflictError("VM may already be starting or in transitional state", "VM_CONFLICT")
             raise CloudOperationError("start_vm", str(e))
 
     async def stop_vm(self, vm_id: str) -> VM:
@@ -336,10 +263,6 @@ class OpenStackProvider(BaseProvider):
         except (NotFoundError, OperationNotAllowedError):
             raise
         except Exception as e:
-            error_str = str(e).lower()
-            # Handle 409 Conflict - VM may already be stopping or in transitional state
-            if "409" in error_str or "conflict" in error_str:
-                raise ConflictError("VM may already be stopping or in transitional state", "VM_CONFLICT")
             raise CloudOperationError("stop_vm", str(e))
 
     async def reboot_vm(self, vm_id: str) -> VM:
@@ -371,176 +294,7 @@ class OpenStackProvider(BaseProvider):
         except (NotFoundError, OperationNotAllowedError):
             raise
         except Exception as e:
-            error_str = str(e).lower()
-            # Handle 409 Conflict - VM may already be rebooting or in transitional state
-            if "409" in error_str or "conflict" in error_str:
-                raise ConflictError("VM may already be rebooting or in transitional state", "VM_CONFLICT")
             raise CloudOperationError("reboot_vm", str(e))
-
-    # Volume Operations
-    async def create_volume(
-        self,
-        name: str,
-        size_gb: int,
-        volume_type: Optional[str] = None,
-        description: Optional[str] = None,
-        metadata: Optional[dict] = None,
-    ) -> Volume:
-        """Create a new volume on OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            volume = block_storage.create_volume(
-                name=name,
-                size=size_gb,
-                volume_type=volume_type,
-                description=description,
-                metadata=metadata or {},
-                wait=False,
-            )
-            return self._volume_from_os(volume)
-        except Exception as e:
-            raise CloudOperationError("create_volume", str(e))
-
-    async def get_volume(self, volume_id: str) -> Volume:
-        """Get volume from OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            volume = block_storage.get_volume(volume_id)
-            if not volume:
-                raise NotFoundError("Volume", volume_id)
-            return self._volume_from_os(volume)
-        except NotFoundError:
-            raise
-        except Exception as e:
-            raise CloudOperationError("get_volume", str(e))
-
-    async def list_volumes(self, limit: int = 100, offset: int = 0) -> tuple[List[Volume], int]:
-        """List volumes from OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            # Only use marker if offset is not 0 (OpenStack quirk)
-            if offset > 0:
-                volumes = list(block_storage.volumes(limit=limit, marker=offset))
-            else:
-                volumes = list(block_storage.volumes(limit=limit))
-            
-            total = len(volumes) + offset
-            return [self._volume_from_os(v) for v in volumes], total
-        except Exception as e:
-            raise CloudOperationError("list_volumes", str(e))
-
-    async def delete_volume(self, volume_id: str) -> bool:
-        """Delete volume from OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            result = block_storage.delete_volume(volume_id, wait=False)
-            return result is not False
-        except Exception as e:
-            if "not found" in str(e).lower():
-                return False
-            raise CloudOperationError("delete_volume", str(e))
-
-    async def attach_volume(
-        self,
-        volume_id: str,
-        vm_id: str,
-        device: Optional[str] = None,
-    ) -> Volume:
-        """Attach volume to VM on OpenStack."""
-        try:
-            compute = self.engine.get_compute()
-            compute.create_volume_attachment(
-                server_id=vm_id,
-                volume_id=volume_id,
-                device=device,
-            )
-            # Return updated volume
-            return await self.get_volume(volume_id)
-        except Exception as e:
-            raise CloudOperationError("attach_volume", str(e))
-
-    async def detach_volume(self, volume_id: str) -> Volume:
-        """Detach volume from its VM on OpenStack."""
-        try:
-            compute = self.engine.get_compute()
-            volume = await self.get_volume(volume_id)
-            
-            if not volume.is_attached:
-                raise ConflictError("Volume not attached", "VOLUME_NOT_ATTACHED")
-            
-            # Find attachment and detach
-            for attachment in volume.attachments:
-                compute.delete_volume_attachment(
-                    attachment_id=attachment.attachment_id,
-                    server_id=attachment.vm_id,
-                )
-            
-            return await self.get_volume(volume_id)
-        except (NotFoundError, ConflictError):
-            raise
-        except Exception as e:
-            raise CloudOperationError("detach_volume", str(e))
-
-    # Snapshot Operations
-    async def create_snapshot(
-        self,
-        name: str,
-        volume_id: str,
-        description: Optional[str] = None,
-        metadata: Optional[dict] = None,
-    ) -> Snapshot:
-        """Create a snapshot on OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            snapshot = block_storage.create_snapshot(
-                name=name,
-                volume_id=volume_id,
-                description=description,
-                metadata=metadata or {},
-                wait=False,
-            )
-            return self._snapshot_from_os(snapshot)
-        except Exception as e:
-            raise CloudOperationError("create_snapshot", str(e))
-
-    async def get_snapshot(self, snapshot_id: str) -> Snapshot:
-        """Get snapshot from OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            snapshot = block_storage.get_snapshot(snapshot_id)
-            if not snapshot:
-                raise NotFoundError("Snapshot", snapshot_id)
-            return self._snapshot_from_os(snapshot)
-        except NotFoundError:
-            raise
-        except Exception as e:
-            raise CloudOperationError("get_snapshot", str(e))
-
-    async def list_snapshots(self, limit: int = 100, offset: int = 0) -> tuple[List[Snapshot], int]:
-        """List snapshots from OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            # Only use marker if offset is not 0 (OpenStack quirk)
-            if offset > 0:
-                snapshots = list(block_storage.snapshots(limit=limit, marker=offset))
-            else:
-                snapshots = list(block_storage.snapshots(limit=limit))
-            
-            total = len(snapshots) + offset
-            return [self._snapshot_from_os(s) for s in snapshots], total
-        except Exception as e:
-            raise CloudOperationError("list_snapshots", str(e))
-
-    async def delete_snapshot(self, snapshot_id: str) -> bool:
-        """Delete snapshot from OpenStack."""
-        try:
-            block_storage = self.engine.get_volume()
-            result = block_storage.delete_snapshot(snapshot_id, wait=False)
-            return result is not False
-        except Exception as e:
-            if "not found" in str(e).lower():
-                return False
-            raise CloudOperationError("delete_snapshot", str(e))
 
     # Image Operations
     async def list_images(self, limit: int = 100, offset: int = 0) -> tuple[List[Image], int]:

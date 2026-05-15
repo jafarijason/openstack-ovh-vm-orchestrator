@@ -22,27 +22,6 @@ class VMStatus(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
-class VolumeStatus(str, Enum):
-    """Volume lifecycle status."""
-    CREATING = "CREATING"
-    AVAILABLE = "AVAILABLE"
-    IN_USE = "IN_USE"
-    DELETING = "DELETING"
-    ERROR = "ERROR"
-    BACKING_UP = "BACKING_UP"
-    RESTORING_BACKUP = "RESTORING_BACKUP"
-    UNKNOWN = "UNKNOWN"
-
-
-class SnapshotStatus(str, Enum):
-    """Snapshot lifecycle status."""
-    CREATING = "CREATING"
-    AVAILABLE = "AVAILABLE"
-    DELETING = "DELETING"
-    ERROR = "ERROR"
-    UNKNOWN = "UNKNOWN"
-
-
 class ImageStatus(str, Enum):
     """Image lifecycle status."""
     QUEUED = "QUEUED"
@@ -62,34 +41,6 @@ class FlavorStatus(str, Enum):
 
 
 @dataclass
-class VolumeAttachment:
-    """Volume attachment to a VM."""
-    attachment_id: str
-    vm_id: str
-    device: str  # Device path like /dev/vdb
-
-
-@dataclass
-class Volume:
-    """Volume domain model."""
-    id: str
-    name: str
-    size_gb: int
-    status: VolumeStatus
-    volume_type: Optional[str] = None
-    description: Optional[str] = None
-    attachments: List[VolumeAttachment] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
-    @property
-    def is_attached(self) -> bool:
-        """Check if volume is attached to any VM."""
-        return len(self.attachments) > 0
-
-
-@dataclass
 class Image:
     """Image domain model."""
     id: str
@@ -102,20 +53,6 @@ class Image:
     is_protected: bool = False
     min_disk_gb: Optional[int] = None
     min_ram_mb: Optional[int] = None
-    description: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
-
-@dataclass
-class Snapshot:
-    """Snapshot domain model."""
-    id: str
-    name: str
-    volume_id: str
-    status: SnapshotStatus
-    size_gb: int
     description: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     created_at: Optional[datetime] = None
