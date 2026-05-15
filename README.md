@@ -18,6 +18,7 @@ An interview assignment proof-of-concept demonstrating clean architecture, API d
 - [API Endpoints](#api-endpoints)
 - [Testing Strategy](#testing-strategy)
 - [Next Steps](#next-steps)
+- [Visual Documentation](#visual-documentation) - 📸 15 diagrams & images
 
 ---
 
@@ -719,6 +720,35 @@ git push origin feature/my-feature
 **Next Phases**: 3 (Tests) → 4 (DevOps) → 5 (Docs)  
 **Last Updated**: May 15, 2024  
 **Repository**: https://github.com/jafarijason/openstack-ovh-vm-orchestrator
+
+---
+
+## Visual Documentation
+
+### 📸 Complete Image Reference
+
+The project includes **15 comprehensive diagrams and images** for visual understanding:
+
+**SVG Diagrams (Scalable Vector Graphics)**:
+- 🏗️ **architecture.svg** - Layered system architecture (FastAPI → Services → Providers → Cloud)
+- 🔄 **api-flow.svg** - Complete request lifecycle (Client → HTTP → Service → Cloud)
+- 🚀 **deployment.svg** - Dev/Docker/Production deployment scenarios + CI/CD pipeline
+- 📊 **testing-coverage.svg** - Testing pyramid, coverage metrics, and infrastructure
+- 📦 **resources.svg** - All 5 resources with operations matrix (VMs, Networks, Images, Flavors, SSH Keys)
+
+**PNG Screenshots (High-Resolution)**:
+- 10 detailed PNG images (1900x850+ pixels) for presentations and printing
+- High-quality renders of all diagrams and interfaces
+- Total: 1.16 MB of reference material
+
+**For Complete Image Guide**: See [docs/IMAGE_GUIDE.md](docs/IMAGE_GUIDE.md)
+
+**Images Used In**:
+- Architecture & Design section (architecture.svg)
+- Deployment Options section (deployment.svg)
+- API Request Flow section (api-flow.svg)
+- Supported Resources section (resources.svg)
+- Testing Strategy section (testing-coverage.svg)
 
 ---
 
