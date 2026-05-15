@@ -300,7 +300,7 @@ export const VmList: React.FC = () => {
               d="M12 4v16m8-8H4"
             />
           </svg>
-          Create VM
+          Create VM - Not implemented for production mode
         </button>
       </div>
 
