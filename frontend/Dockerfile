@@ -14,6 +14,9 @@ RUN yarn install
 # Copy source
 COPY . .
 
+# Set API URL for Docker environment
+ENV VITE_API_URL=http://api:8000
+
 # Build app
 RUN npm run build
 
