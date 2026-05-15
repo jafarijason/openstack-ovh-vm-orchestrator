@@ -1243,4 +1243,4 @@ Built with:
 
 ---
 
-**Author**: Jason Afari | **Date**: May 2024 | **Version**: 0.1.0 (PoC)
+**Author**: Jason Jafari | **Date**: May 2024 | **Version**: 0.1.0 (PoC)
