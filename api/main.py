@@ -14,12 +14,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
-from app.api.routes.vm import router as vm_router
-from app.api.routes.volume import router as volume_router, snapshot_router
-from app.services.vm_service import VMService
-from app.services.volume_service import VolumeService
-from app.providers.factory import create_provider, list_available_clouds
-from app.core.exceptions import OrchestratorException
+from api.api.routes.vm import router as vm_router
+from api.api.routes.volume import router as volume_router, snapshot_router
+from api.services.vm_service import VMService
+from api.services.volume_service import VolumeService
+from api.providers.factory import create_provider, list_available_clouds
+from api.core.exceptions import OrchestratorException
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

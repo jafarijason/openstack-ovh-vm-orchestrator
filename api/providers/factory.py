@@ -8,10 +8,10 @@ based on cloud configuration.
 import logging
 from typing import Optional
 
-from app.core.config import CloudConfig, get_clouds_config
-from app.providers.base import BaseProvider
-from app.providers.mock_provider import MockProvider
-from app.core.exceptions import CloudConnectionError
+from api.core.config import CloudConfig, get_clouds_config
+from api.providers.base import BaseProvider
+from api.providers.mock_provider import MockProvider
+from api.core.exceptions import CloudConnectionError
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def create_provider(cloud_name: Optional[str] = None) -> BaseProvider:
     # Create OpenStack provider
     logger.info("Initializing OpenStack provider")
     try:
-        from app.providers.openstack_provider import OpenStackProvider
+        from api.providers.openstack_provider import OpenStackProvider
 
         return OpenStackProvider(cloud_name=cloud_config.name)
     except ImportError:

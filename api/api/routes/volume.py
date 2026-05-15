@@ -1,8 +1,8 @@
 """Volume API routes."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from app.api.schemas.common import SuccessResponse
-from app.api.schemas.volume import (
+from api.api.schemas.common import SuccessResponse
+from api.api.schemas.volume import (
     CreateVolumeRequest,
     UpdateVolumeRequest,
     AttachVolumeRequest,
@@ -11,9 +11,9 @@ from app.api.schemas.volume import (
     CreateSnapshotRequest,
     SnapshotResponse,
 )
-from app.services.volume_service import VolumeService
-from app.core.exceptions import OrchestratorException
-from app.core.models import Volume, Snapshot
+from api.services.volume_service import VolumeService
+from api.core.exceptions import OrchestratorException
+from api.core.models import Volume, Snapshot
 
 router = APIRouter(prefix="/volumes", tags=["Volumes"])
 snapshot_router = APIRouter(prefix="/snapshots", tags=["Snapshots"])

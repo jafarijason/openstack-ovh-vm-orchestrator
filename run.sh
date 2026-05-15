@@ -25,4 +25,4 @@ echo "   - Swagger UI: http://localhost:8000/docs"
 echo "   - ReDoc: http://localhost:8000/redoc"
 echo ""
 
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000

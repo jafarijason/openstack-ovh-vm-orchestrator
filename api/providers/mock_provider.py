@@ -8,9 +8,9 @@ Useful for development and testing without real cloud credentials.
 from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import uuid4
-from app.providers.base import BaseProvider
-from app.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, VolumeAttachment
-from app.core.exceptions import NotFoundError, ConflictError, OperationNotAllowedError
+from api.providers.base import BaseProvider
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, VolumeAttachment
+from api.core.exceptions import NotFoundError, ConflictError, OperationNotAllowedError
 
 
 class MockProvider(BaseProvider):

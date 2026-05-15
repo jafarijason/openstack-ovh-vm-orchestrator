@@ -7,9 +7,9 @@ maps cloud operations to the provider interface.
 
 from typing import List, Optional
 from datetime import datetime
-from app.providers.base import BaseProvider
-from app.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, VolumeAttachment
-from app.core.exceptions import (
+from api.providers.base import BaseProvider
+from api.core.models import VM, VMStatus, Volume, VolumeStatus, Snapshot, SnapshotStatus, VolumeAttachment
+from api.core.exceptions import (
     CloudConnectionError,
     CloudOperationError,
     NotFoundError,
@@ -18,7 +18,7 @@ from app.core.exceptions import (
 )
 
 try:
-    from app.engine import OpenStackEngine
+    from api.engine import OpenStackEngine
 except ImportError:
     raise ImportError("OpenStackEngine not available. Install openstacksdk and configure clouds.yaml")
 

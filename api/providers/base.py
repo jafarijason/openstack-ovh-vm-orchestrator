@@ -1,26 +1,130 @@
-"""Volume service layer.
+"""
+Base provider interface (abstract base class).
 
-Orchestrates volume operations using the provider abstraction.
-Contains business logic independent of HTTP framework.
+All provider implementations must inherit from this class to ensure
+consistent interface and behavior.
 """
 
+from abc import ABC, abstractmethod
 from typing import List, Optional
-from app.providers.base import BaseProvider
-from app.core.models import Volume, Snapshot
+from api.core.models import VM, Volume, Snapshot
 
 
-class VolumeService:
-    """Service for volume and snapshot operations."""
+class BaseProvider(ABC):
+    """Abstract base provider for infrastructure operations."""
 
-    def __init__(self, provider: BaseProvider):
-        """Initialize volume service.
+    @abstractmethod
+    async def check_connection(self) -> bool:
+        """Check if connected to cloud provider.
+
+        Returns:
+            True if connected, False otherwise
+        """
+        pass
+
+    # VM Operations
+    @abstractmethod
+    async def create_vm(
+        self,
+        name: str,
+        image_id: str,
+        flavor_id: str,
+        network_ids: List[str],
+        key_name: Optional[str] = None,
+        security_groups: Optional[List[str]] = None,
+        metadata: Optional[dict] = None,
+    ) -> VM:
+        """Create a new virtual machine.
 
         Args:
-            provider: Infrastructure provider instance
+            name: VM name
+            image_id: Image to boot from
+            flavor_id: Instance type/flavor
+            network_ids: Networks to attach
+            key_name: SSH key name
+            security_groups: Security groups
+            metadata: Custom metadata
+
+        Returns:
+            Created VM object
         """
-        self.provider = provider
+        pass
+
+    @abstractmethod
+    async def get_vm(self, vm_id: str) -> VM:
+        """Get VM by ID.
+
+        Args:
+            vm_id: VM unique identifier
+
+        Returns:
+            VM object
+        """
+        pass
+
+    @abstractmethod
+    async def list_vms(self, limit: int = 100, offset: int = 0) -> tuple[List[VM], int]:
+        """List all VMs with pagination.
+
+        Args:
+            limit: Maximum number of results
+            offset: Number of results to skip
+
+        Returns:
+            Tuple of (list of VMs, total count)
+        """
+        pass
+
+    @abstractmethod
+    async def delete_vm(self, vm_id: str) -> bool:
+        """Delete a VM.
+
+        Args:
+            vm_id: VM unique identifier
+
+        Returns:
+            True if deleted, False if not found
+        """
+        pass
+
+    @abstractmethod
+    async def start_vm(self, vm_id: str) -> VM:
+        """Start a stopped VM.
+
+        Args:
+            vm_id: VM unique identifier
+
+        Returns:
+            Updated VM object
+        """
+        pass
+
+    @abstractmethod
+    async def stop_vm(self, vm_id: str) -> VM:
+        """Stop a running VM.
+
+        Args:
+            vm_id: VM unique identifier
+
+        Returns:
+            Updated VM object
+        """
+        pass
+
+    @abstractmethod
+    async def reboot_vm(self, vm_id: str) -> VM:
+        """Reboot a VM.
+
+        Args:
+            vm_id: VM unique identifier
+
+        Returns:
+            Updated VM object
+        """
+        pass
 
     # Volume Operations
+    @abstractmethod
     async def create_volume(
         self,
         name: str,
@@ -41,14 +145,9 @@ class VolumeService:
         Returns:
             Created Volume object
         """
-        return await self.provider.create_volume(
-            name=name,
-            size_gb=size_gb,
-            volume_type=volume_type,
-            description=description,
-            metadata=metadata,
-        )
+        pass
 
+    @abstractmethod
     async def get_volume(self, volume_id: str) -> Volume:
         """Get volume by ID.
 
@@ -58,10 +157,11 @@ class VolumeService:
         Returns:
             Volume object
         """
-        return await self.provider.get_volume(volume_id)
+        pass
 
+    @abstractmethod
     async def list_volumes(self, limit: int = 100, offset: int = 0) -> tuple[List[Volume], int]:
-        """List all volumes.
+        """List all volumes with pagination.
 
         Args:
             limit: Maximum number of results
@@ -70,8 +170,9 @@ class VolumeService:
         Returns:
             Tuple of (list of volumes, total count)
         """
-        return await self.provider.list_volumes(limit=limit, offset=offset)
+        pass
 
+    @abstractmethod
     async def delete_volume(self, volume_id: str) -> bool:
         """Delete a volume.
 
@@ -81,8 +182,9 @@ class VolumeService:
         Returns:
             True if deleted, False if not found
         """
-        return await self.provider.delete_volume(volume_id)
+        pass
 
+    @abstractmethod
     async def attach_volume(
         self,
         volume_id: str,
@@ -99,12 +201,9 @@ class VolumeService:
         Returns:
             Updated Volume object
         """
-        return await self.provider.attach_volume(
-            volume_id=volume_id,
-            vm_id=vm_id,
-            device=device,
-        )
+        pass
 
+    @abstractmethod
     async def detach_volume(self, volume_id: str) -> Volume:
         """Detach a volume from its VM.
 
@@ -114,9 +213,10 @@ class VolumeService:
         Returns:
             Updated Volume object
         """
-        return await self.provider.detach_volume(volume_id)
+        pass
 
     # Snapshot Operations
+    @abstractmethod
     async def create_snapshot(
         self,
         name: str,
@@ -135,13 +235,9 @@ class VolumeService:
         Returns:
             Created Snapshot object
         """
-        return await self.provider.create_snapshot(
-            name=name,
-            volume_id=volume_id,
-            description=description,
-            metadata=metadata,
-        )
+        pass
 
+    @abstractmethod
     async def get_snapshot(self, snapshot_id: str) -> Snapshot:
         """Get snapshot by ID.
 
@@ -151,10 +247,11 @@ class VolumeService:
         Returns:
             Snapshot object
         """
-        return await self.provider.get_snapshot(snapshot_id)
+        pass
 
+    @abstractmethod
     async def list_snapshots(self, limit: int = 100, offset: int = 0) -> tuple[List[Snapshot], int]:
-        """List all snapshots.
+        """List all snapshots with pagination.
 
         Args:
             limit: Maximum number of results
@@ -163,8 +260,9 @@ class VolumeService:
         Returns:
             Tuple of (list of snapshots, total count)
         """
-        return await self.provider.list_snapshots(limit=limit, offset=offset)
+        pass
 
+    @abstractmethod
     async def delete_snapshot(self, snapshot_id: str) -> bool:
         """Delete a snapshot.
 
@@ -174,4 +272,4 @@ class VolumeService:
         Returns:
             True if deleted, False if not found
         """
-        return await self.provider.delete_snapshot(snapshot_id)
+        pass

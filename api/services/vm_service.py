@@ -5,8 +5,8 @@ Contains business logic independent of HTTP framework.
 """
 
 from typing import List, Optional
-from app.providers.base import BaseProvider
-from app.core.models import VM
+from api.providers.base import BaseProvider
+from api.core.models import VM
 
 
 class VMService:

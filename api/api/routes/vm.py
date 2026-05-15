@@ -2,17 +2,17 @@
 
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from app.api.schemas.common import SuccessResponse, ErrorResponse
-from app.api.schemas.vm import (
+from api.api.schemas.common import SuccessResponse, ErrorResponse
+from api.api.schemas.vm import (
     CreateVMRequest,
     UpdateVMRequest,
     VMResponse,
     VMActionRequest,
     VMActionResponse,
 )
-from app.services.vm_service import VMService
-from app.core.exceptions import OrchestratorException
-from app.core.models import VM
+from api.services.vm_service import VMService
+from api.core.exceptions import OrchestratorException
+from api.core.models import VM
 
 router = APIRouter(prefix="/vms", tags=["VMs"])
 
