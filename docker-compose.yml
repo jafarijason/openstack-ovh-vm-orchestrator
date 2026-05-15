@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openstack-orchestrator-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Use mock provider by default (no credentials needed)
+      OS_CLOUD: mock
+      LOG_LEVEL: INFO
+      PYTHONUNBUFFERED: 1
+    volumes:
+      # Mount local code for development (remove for production)
+      - ./api:/app/api
+    command: python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - openstack-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Service (optional)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: openstack-orchestrator-frontend
+    ports:
+      - "5174:5174"
+    environment:
+      VITE_API_URL: http://api:8000
+    depends_on:
+      - api
+    networks:
+      - openstack-network
+    volumes:
+      # Mount for development
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+
+networks:
+  openstack-network:
+    driver: bridge
+
+volumes:
+  # Define named volumes if needed for persistence
+  # api-data:
+  # frontend-build:
+
+# Quick start guide:
+# 1. Build images:
+#    docker-compose build
+#
+# 2. Start services:
+#    docker-compose up -d
+#
+# 3. Check status:
+#    docker-compose ps
+#    docker-compose logs api
+#
+# 4. Test API:
+#    curl http://localhost:8000/health
+#    curl http://localhost:8000/vms
+#
+# 5. Access frontend:
+#    Open http://localhost:5174
+#
+# 6. Stop services:
+#    docker-compose down
+#
+# 7. Stop and remove volumes:
+#    docker-compose down -v
+#
+# Development workflow:
+# - Backend code changes are reflected immediately (--reload enabled)
+# - Frontend needs npm run dev inside container or host machine
+# - API docs available at http://localhost:8000/docs
